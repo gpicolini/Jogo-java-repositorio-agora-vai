@@ -2,26 +2,33 @@ package jogo;
 
 public class Peca {
 
-    private String lado1;
-    private String lado2;
+    private String substancia;
+    private String funcao;
 
-    public Peca(String lado1, String lado2) {
-        this.lado1 = lado1;
-        this.lado2 = lado2;
+    public Peca(String substancia, String funcao) {
+        this.substancia = substancia;
+        this.funcao = funcao;
     }
 
-    public void inverter() {
-        String temp = lado1;
-        lado1 = lado2;
-        lado2 = temp;
+    public String getSubstancia() {
+        return substancia;
     }
 
-    public boolean conecta(String conceito) {
-        return lado1.equals(conceito) || lado2.equals(conceito);
+    public String getFuncao() {
+        return funcao;
     }
+
+    public boolean conecta(Peca outra) {
+    return this.funcao.equalsIgnoreCase(outra.getFuncao());
+}
+    
 
     @Override
     public String toString() {
-        return "[" + lado1 + " | " + lado2 + "]";
-    }
-}   
+        return "[" + substancia + " | " + funcao + "]";
+    
+}
+ 
+}
+
+// TOMITA ME MAMA

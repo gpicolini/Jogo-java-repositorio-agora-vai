@@ -6,9 +6,7 @@ import java.sql.SQLException;
 
 public class Jogo {
 
-    private static final String URL =
-        "jdbc:mysql://trolley.proxy.rlwy.net:52251/railway?useSSL=false&serverTimezone=UTC";
-
+    private static final String URL = "jdbc:mysql://trolley.proxy.rlwy.net:52251/railway?useSSL=false&serverTimezone=UTC";
     private static final String USER = "root";
     private static final String PASSWORD = "TUEbJashZWrUFTRZyBeIYBXtUZEUILVG";
 
@@ -38,6 +36,8 @@ public class Jogo {
     public void abrirJogo(String nome) {
 
         System.out.println("Jogador logado: " + nome);
+
+        new TelaJogo(nome);
 
     }
 }
