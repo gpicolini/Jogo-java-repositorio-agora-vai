@@ -4,16 +4,23 @@ public class TesteMonte {
 
     public static void main(String[] args) {
 
-        Monte monte = new Monte();
+        // ===================== CONFIG =====================
+        Dificuldade dificuldade = Dificuldade.FACIL;
 
-        System.out.println("Peças no monte: "
-                + monte.quantidadePecas());
+        Monte monte = new Monte(dificuldade);
 
+        System.out.println("Peças no monte: " + monte.quantidadePecas());
+
+        // ===================== COMPRA TODAS AS PEÇAS =====================
         while (!monte.vazio()) {
 
             Peca p = monte.comprarPeca();
 
-            System.out.println(p);
+            if (p != null) {
+                System.out.println(p);
+            }
         }
+
+        System.out.println("\nMonte vazio!");
     }
 }

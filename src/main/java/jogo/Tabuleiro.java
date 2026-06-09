@@ -14,9 +14,10 @@ public class Tabuleiro {
         return pecas.isEmpty();
     }
 
+    // ===================== PRIMEIRA PEÇA =====================
     public boolean adicionarPrimeiraPeca(Peca peca) {
 
-        if (!pecas.isEmpty()) {
+        if (peca == null || !pecas.isEmpty()) {
             return false;
         }
 
@@ -24,7 +25,10 @@ public class Tabuleiro {
         return true;
     }
 
+    // ===================== LADO ESQUERDO =====================
     public boolean adicionarEsquerda(Peca peca) {
+
+        if (peca == null) return false;
 
         if (pecas.isEmpty()) {
             pecas.add(peca);
@@ -33,7 +37,7 @@ public class Tabuleiro {
 
         Peca primeira = pecas.get(0);
 
-        if (peca.conecta(primeira)) {
+        if (conecta(peca, primeira)) {
             pecas.add(0, peca);
             return true;
         }
@@ -41,7 +45,10 @@ public class Tabuleiro {
         return false;
     }
 
+    // ===================== LADO DIREITO =====================
     public boolean adicionarDireita(Peca peca) {
+
+        if (peca == null) return false;
 
         if (pecas.isEmpty()) {
             pecas.add(peca);
@@ -50,7 +57,7 @@ public class Tabuleiro {
 
         Peca ultima = pecas.get(pecas.size() - 1);
 
-        if (peca.conecta(ultima)) {
+        if (conecta(peca, ultima)) {
             pecas.add(peca);
             return true;
         }
@@ -58,7 +65,22 @@ public class Tabuleiro {
         return false;
     }
 
+    // ===================== REGRA CENTRAL =====================
+    private boolean conecta(Peca a, Peca b) {
+
+        if (a == null || b == null) return false;
+
+        // regra atual: mesmo tipo químico (Ácido, Base, Sal, Óxido)
+        return a.getFuncao().equalsIgnoreCase(b.getFuncao());
+    }
+
+    // ===================== DEBUG =====================
     public void mostrarTabuleiro() {
+
+        if (pecas.isEmpty()) {
+            System.out.println("[TABULEIRO VAZIO]");
+            return;
+        }
 
         for (Peca p : pecas) {
             System.out.print(p + " ");

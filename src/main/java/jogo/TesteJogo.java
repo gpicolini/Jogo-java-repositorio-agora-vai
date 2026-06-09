@@ -4,28 +4,36 @@ public class TesteJogo {
 
     public static void main(String[] args) {
 
-        Monte monte = new Monte();
+        // ===================== CONFIG =====================
+        Dificuldade dificuldade = Dificuldade.FACIL;
+
+        Monte monte = new Monte(dificuldade);
         Jogador jogador = new Jogador("Gabriel");
         Tabuleiro tabuleiro = new Tabuleiro();
 
-        
+        // ===================== DISTRIBUIÇÃO =====================
         for (int i = 0; i < 5; i++) {
-            jogador.receberPeca(monte.comprarPeca());
+            Peca p = monte.comprarPeca();
+            if (p != null) {
+                jogador.receberPeca(p);
+            }
         }
 
+        System.out.println("=== MÃO INICIAL ===");
         jogador.mostrarMao();
 
-       
-        Peca primeira = jogador.jogarPeca(0);
+        // ===================== PRIMEIRA JOGADA =====================
+        Peca primeira = jogador.getMao().get(0);
+        jogador.jogarPeca(0);
 
         tabuleiro.adicionarPrimeiraPeca(primeira);
 
-        System.out.println("\nTabuleiro:");
-
+        // ===================== ESTADO DO TABULEIRO =====================
+        System.out.println("\n=== TABULEIRO ===");
         tabuleiro.mostrarTabuleiro();
 
-        System.out.println("\nMão após a jogada:");
-
+        // ===================== ESTADO FINAL DA MÃO =====================
+        System.out.println("\n=== MÃO APÓS JOGADA ===");
         jogador.mostrarMao();
     }
 }

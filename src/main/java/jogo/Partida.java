@@ -7,122 +7,176 @@ public class Partida {
     private Tabuleiro tabuleiro;
     private SistemaPontuacao pontuacao;
 
-    public Partida(String nomeJogador) {
+    private Dificuldade dificuldade;
 
-        jogador = new Jogador(nomeJogador);
+    private int fase = 1;
+    private int comprasRestantes;
 
-        monte = new Monte();
+    // ===================== CONSTRUTOR =====================
+    public Partida(String nomeJogador, Dificuldade dificuldade) {
 
-        tabuleiro = new Tabuleiro();
+        this.jogador = new Jogador(nomeJogador);
+        this.dificuldade = dificuldade;
 
-        pontuacao = new SistemaPontuacao();
+        this.pontuacao = new SistemaPontuacao();
 
-        distribuirPecas();
+        iniciarFase();
     }
 
-    private void distribuirPecas() {
+    // ===================== INICIAR FASE =====================
+    private void iniciarFase() {
 
-        for(int i = 0; i < 5; i++) {
-            jogador.receberPeca(monte.comprarPeca());
+        monte = new Monte(dificuldade);
+        tabuleiro = new Tabuleiro();
+        jogador.getMao().clear();
+
+        if (fase == 1) {
+            comprasRestantes = 5;
+            distribuirFacil();
+        }
+
+        if (fase == 2) {
+            comprasRestantes = 3;
+            distribuirMedio();
+        }
+
+        if (fase == 3) {
+            comprasRestantes = 2;
+            distribuirDificil();
         }
     }
 
+    // ===================== FACIL =====================
+    private void distribuirFacil() {
+
+        for (int i = 0; i < 3; i++) {
+            Peca p = monte.comprarPeca();
+            if (p != null) jogador.receberPeca(p);
+        }
+    }
+
+    // ===================== MEDIO =====================
+    private void distribuirMedio() {
+
+        for (int i = 0; i < 5; i++) {
+
+            if (i < 3) {
+                Peca p = monte.comprarPeca();
+                if (p != null) jogador.receberPeca(p);
+            } else {
+                jogador.receberPeca(new Peca("X", "Inútil", TipoQuimico.SAL));
+            }
+        }
+    }
+
+    // ===================== DIFICIL =====================
+    private void distribuirDificil() {
+
+        for (int i = 0; i < 7; i++) {
+
+            if (i < 3) {
+                Peca p = monte.comprarPeca();
+                if (p != null) jogador.receberPeca(p);
+            } else {
+                jogador.receberPeca(new Peca("X", "Inútil", TipoQuimico.OXIDO));
+            }
+        }
+    }
+
+    // ===================== JOGAR PEÇA =====================
     public boolean jogarPeca(int indice, boolean direita) {
 
-        if(indice < 0 || indice >= jogador.getMao().size())
+        if (indice < 0 || indice >= jogador.getMao().size())
             return false;
 
         Peca peca = jogador.getMao().get(indice);
 
         boolean sucesso;
 
-        if(tabuleiro.vazio()) {
-
-            jogador.jogarPeca(indice);
+        if (tabuleiro.vazio()) {
 
             tabuleiro.adicionarPrimeiraPeca(peca);
+            jogador.jogarPeca(indice);
 
             pontuacao.adicionarAcerto();
-
             return true;
         }
 
-        if(direita) {
-            sucesso = tabuleiro.adicionarDireita(peca);
-        }
-        else {
-            sucesso = tabuleiro.adicionarEsquerda(peca);
-        }
+        sucesso = direita
+                ? tabuleiro.adicionarDireita(peca)
+                : tabuleiro.adicionarEsquerda(peca);
 
-        if(sucesso) {
-
+        if (sucesso) {
             jogador.jogarPeca(indice);
-
             pontuacao.adicionarAcerto();
-        }
-        else {
-
+        } else {
             pontuacao.adicionarErro();
         }
 
         return sucesso;
     }
 
+    // ===================== COMPRA =====================
     public void comprarPeca() {
 
-        if(!monte.vazio()) {
-            jogador.receberPeca(monte.comprarPeca());
+        if (comprasRestantes <= 0) return;
+
+        Peca p = monte.comprarPeca();
+
+        if (p != null) {
+            jogador.receberPeca(p);
+            comprasRestantes--;
         }
     }
 
-    public boolean existeJogadaPossivel() {
-
-    if (tabuleiro.vazio()) {
-        return true;
-    }
-
-    Peca primeira = tabuleiro.getPecas().get(0);
-
-    Peca ultima = tabuleiro.getPecas()
-                           .get(tabuleiro.getPecas().size() - 1);
-
-    for (Peca p : jogador.getMao()) {
-
-        if (p.conecta(primeira) || p.conecta(ultima)) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
+    // ===================== FIM =====================
     public boolean terminou() {
 
-    if (jogador.quantidadePecas() == 0) {
+        if (jogador.quantidadePecas() == 0)
+            return true;
+
+        if (monte.vazio() && !existeJogadaPossivel())
+            return true;
+
+        return false;
+    }
+
+    // ===================== PRÓXIMA FASE =====================
+    public boolean proximaFase() {
+
+        if (fase >= 3) return false;
+
+        fase++;
+        iniciarFase();
         return true;
     }
 
-    if (monte.vazio() && !existeJogadaPossivel()) {
-        return true;
+    // ===================== JOGADA POSSÍVEL =====================
+    public boolean existeJogadaPossivel() {
+
+        if (tabuleiro.vazio()) return true;
+
+        Peca primeira = tabuleiro.getPecas().get(0);
+        Peca ultima = tabuleiro.getPecas().get(tabuleiro.getPecas().size() - 1);
+
+        for (Peca p : jogador.getMao()) {
+            if (p.conecta(primeira) || p.conecta(ultima)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
-    return false;
-}
-    
-
+    // ===================== FINALIZAR =====================
     public void finalizar() {
         pontuacao.finalizarPartida();
     }
 
-    public Jogador getJogador() {
-        return jogador;
-    }
-
-    public Tabuleiro getTabuleiro() {
-        return tabuleiro;
-    }
-
-    public SistemaPontuacao getPontuacao() {
-        return pontuacao;
-    }
+    // ===================== GETTERS =====================
+    public Jogador getJogador() { return jogador; }
+    public Tabuleiro getTabuleiro() { return tabuleiro; }
+    public SistemaPontuacao getPontuacao() { return pontuacao; }
+    public int getFase() { return fase; }
+    public Dificuldade getDificuldade() { return dificuldade; }
 }

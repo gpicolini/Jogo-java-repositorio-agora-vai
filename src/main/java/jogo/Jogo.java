@@ -37,7 +37,7 @@ public class Jogo {
 
         System.out.println("Jogador logado: " + nome);
 
-        new TelaJogo(nome);
+        new TelaJogo(nome, Dificuldade.FACIL);
 
     }
 }
