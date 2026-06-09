@@ -75,9 +75,40 @@ public class Partida {
         }
     }
 
-    public boolean terminou() {
-        return jogador.quantidadePecas() == 0;
+    public boolean existeJogadaPossivel() {
+
+    if (tabuleiro.vazio()) {
+        return true;
     }
+
+    Peca primeira = tabuleiro.getPecas().get(0);
+
+    Peca ultima = tabuleiro.getPecas()
+                           .get(tabuleiro.getPecas().size() - 1);
+
+    for (Peca p : jogador.getMao()) {
+
+        if (p.conecta(primeira) || p.conecta(ultima)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+    public boolean terminou() {
+
+    if (jogador.quantidadePecas() == 0) {
+        return true;
+    }
+
+    if (monte.vazio() && !existeJogadaPossivel()) {
+        return true;
+    }
+
+    return false;
+}
+    
 
     public void finalizar() {
         pontuacao.finalizarPartida();
