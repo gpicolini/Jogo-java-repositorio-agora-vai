@@ -25,10 +25,11 @@ public class Tabuleiro {
         return true;
     }
 
-    // ===================== LADO ESQUERDO =====================
+    // ===================== ESQUERDA =====================
     public boolean adicionarEsquerda(Peca peca) {
 
-        if (peca == null) return false;
+        if (peca == null)
+            return false;
 
         if (pecas.isEmpty()) {
             pecas.add(peca);
@@ -38,52 +39,74 @@ public class Tabuleiro {
         Peca primeira = pecas.get(0);
 
         if (conecta(peca, primeira)) {
+
             pecas.add(0, peca);
+
             return true;
         }
 
         return false;
     }
 
-    // ===================== LADO DIREITO =====================
+    // ===================== DIREITA =====================
     public boolean adicionarDireita(Peca peca) {
 
-        if (peca == null) return false;
+        if (peca == null)
+            return false;
 
         if (pecas.isEmpty()) {
             pecas.add(peca);
             return true;
         }
 
-        Peca ultima = pecas.get(pecas.size() - 1);
+        Peca ultima = pecas.get(
+                pecas.size() - 1
+        );
 
-        if (conecta(peca, ultima)) {
+        if (conecta(ultima, peca)) {
+
             pecas.add(peca);
+
             return true;
         }
 
         return false;
     }
 
-    // ===================== REGRA CENTRAL =====================
-    private boolean conecta(Peca a, Peca b) {
+    // ===================== REGRA DOMINÓ =====================
+    private boolean conecta(Peca esquerda, Peca direita) {
 
-        if (a == null || b == null) return false;
+        if (esquerda == null || direita == null)
+            return false;
 
-        // regra atual: mesmo tipo químico (Ácido, Base, Sal, Óxido)
-        return a.getFuncao().equalsIgnoreCase(b.getFuncao());
+        return esquerda
+                .getLadoDireito()
+                .equalsIgnoreCase(
+                        direita.getLadoEsquerdo()
+                );
     }
 
     // ===================== DEBUG =====================
     public void mostrarTabuleiro() {
 
         if (pecas.isEmpty()) {
-            System.out.println("[TABULEIRO VAZIO]");
+
+            System.out.println(
+                    "[TABULEIRO VAZIO]"
+            );
+
             return;
         }
 
         for (Peca p : pecas) {
-            System.out.print(p + " ");
+
+            System.out.print(
+                    "[" +
+                    p.getLadoEsquerdo() +
+                    "|" +
+                    p.getLadoDireito() +
+                    "] "
+            );
         }
 
         System.out.println();

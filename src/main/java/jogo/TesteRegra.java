@@ -6,21 +6,28 @@ public class TesteRegra {
 
         Tabuleiro tabuleiro = new Tabuleiro();
 
-        Peca sal = new Peca("NaCl", "Sal", TipoQuimico.SAL);
-        Peca outroSal = new Peca("KBr", "Sal", TipoQuimico.SAL);
-        Peca acido = new Peca("HCl", "Ácido", TipoQuimico.ACIDO);
+        // conecta
+        Peca p1 = new Peca("NaCl", "KBr");
 
-        tabuleiro.adicionarPrimeiraPeca(sal);
+        // conecta com p1
+        Peca p2 = new Peca("KBr", "CaCO3");
+
+        // NÃO conecta
+        Peca p3 = new Peca("HCl", "H2SO4");
+
+        tabuleiro.adicionarPrimeiraPeca(p1);
 
         System.out.println(
-            "Adicionar outro sal: " +
-            tabuleiro.adicionarDireita(outroSal)
+                "Adicionar peça 2: " +
+                tabuleiro.adicionarDireita(p2)
         );
 
         System.out.println(
-            "Adicionar ácido: " +
-            tabuleiro.adicionarDireita(acido)
+                "Adicionar peça 3: " +
+                tabuleiro.adicionarDireita(p3)
         );
+
+        System.out.println();
 
         tabuleiro.mostrarTabuleiro();
     }

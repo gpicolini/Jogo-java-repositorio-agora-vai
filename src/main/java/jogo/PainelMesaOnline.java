@@ -1,0 +1,234 @@
+package jogo;
+
+import java.awt.*;
+
+import javax.swing.ImageIcon;
+import javax.swing.JPanel;
+
+public class PainelMesaOnline extends JPanel {
+
+    private PartidaOnlineDAO dao;
+    private String codigoSala;
+    private int minhaOrdem;
+    private String nomeJogador;
+
+    public PainelMesaOnline(
+            PartidaOnlineDAO dao,
+            String codigoSala,
+            int minhaOrdem,
+            String nomeJogador
+    ) {
+        this.dao = dao;
+        this.codigoSala = codigoSala;
+        this.minhaOrdem = minhaOrdem;
+        this.nomeJogador = nomeJogador;
+
+        setBackground(new Color(30, 30, 30));
+    }
+
+    @Override
+protected void paintComponent(Graphics g) {
+
+    super.paintComponent(g);
+
+    Graphics2D g2 = (Graphics2D) g;
+
+    g2.setRenderingHint(
+            RenderingHints.KEY_ANTIALIASING,
+            RenderingHints.VALUE_ANTIALIAS_ON
+    );
+
+    java.net.URL urlFundo =
+            getClass().getResource("/jogo/images/lab.png");
+
+    if (urlFundo != null) {
+        ImageIcon fundo = new ImageIcon(urlFundo);
+
+        g2.drawImage(
+                fundo.getImage(),
+                0,
+                0,
+                getWidth(),
+                getHeight(),
+                this
+        );
+    } else {
+        g2.setColor(new Color(30, 30, 30));
+        g2.fillRect(0, 0, getWidth(), getHeight());
+        System.out.println("Imagem lab.png não encontrada!");
+    }
+
+    int larguraMesa = 900;
+    int alturaMesa = 500;
+
+    int xMesa = (getWidth() - larguraMesa) / 2;
+    int yMesa = (getHeight() - alturaMesa) / 2;
+
+    g2.setColor(new Color(110, 0, 0, 220));
+    g2.fillRoundRect(
+            xMesa,
+            yMesa,
+            larguraMesa,
+            alturaMesa,
+            45,
+            45
+    );
+
+    g2.setColor(new Color(90, 150, 25, 235));
+    g2.fillRoundRect(
+            xMesa + 35,
+            yMesa + 45,
+            larguraMesa - 70,
+            alturaMesa - 90,
+            35,
+            35
+    );
+
+    desenharMonte(g2, xMesa, yMesa);
+    desenharJogadores(g2, xMesa, yMesa, larguraMesa, alturaMesa);
+    desenharPecasDaMesa(g2);
+}
+
+    private void desenharMonte(Graphics2D g2, int xMesa, int yMesa) {
+
+        int x = xMesa + 65;
+        int y = yMesa + 210;
+
+        for (int i = 0; i < 4; i++) {
+            g2.setColor(Color.WHITE);
+            g2.fillRoundRect(x + (i * 4), y - (i * 4), 55, 75, 8, 8);
+
+            g2.setColor(Color.BLACK);
+            g2.drawRoundRect(x + (i * 4), y - (i * 4), 55, 75, 8, 8);
+        }
+
+        g2.setColor(Color.WHITE);
+        g2.setFont(new Font("Arial", Font.BOLD, 14));
+        g2.drawString("Monte", x - 2, y + 95);
+    }
+
+    private void desenharJogadores(
+            Graphics2D g2,
+            int xMesa,
+            int yMesa,
+            int larguraMesa,
+            int alturaMesa
+    ) {
+
+        int qtd = dao.getQuantidadeJogadores(codigoSala);
+        int jogadorAtual = dao.getIndiceJogadorAtual(codigoSala);
+
+        int[][] posicoes = {
+                {xMesa + larguraMesa / 2, yMesa + 35},
+                {xMesa + larguraMesa - 70, yMesa + 90},
+                {xMesa + larguraMesa / 2, yMesa + alturaMesa - 35},
+                {xMesa + 70, yMesa + 90}
+        };
+
+        for (int i = 0; i < qtd; i++) {
+
+            int x = posicoes[i][0];
+            int y = posicoes[i][1];
+
+            if (i == jogadorAtual) {
+                g2.setColor(new Color(255, 230, 120));
+            } else if (i == minhaOrdem) {
+                g2.setColor(new Color(120, 220, 255));
+            } else {
+                g2.setColor(new Color(230, 230, 230));
+            }
+
+            g2.fillOval(x - 25, y - 25, 50, 50);
+
+            g2.setColor(Color.DARK_GRAY);
+            g2.setStroke(new BasicStroke(2));
+            g2.drawOval(x - 25, y - 25, 50, 50);
+
+            g2.setFont(new Font("Arial", Font.BOLD, 14));
+            g2.setColor(Color.BLACK);
+
+            String txt = String.valueOf(i + 1);
+            FontMetrics fm = g2.getFontMetrics();
+
+            g2.drawString(
+                    txt,
+                    x - fm.stringWidth(txt) / 2,
+                    y + fm.getAscent() / 2 - 2
+            );
+        }
+    }
+
+    private void desenharPecaCentro(Graphics2D g2) {
+
+        int largura = 130;
+        int altura = 70;
+
+        int x = (getWidth() - largura) / 2;
+        int y = getHeight() / 2 - 35;
+
+        g2.setColor(Color.WHITE);
+        g2.fillRoundRect(x, y, largura, altura, 10, 10);
+
+        g2.setColor(Color.BLACK);
+        g2.drawRoundRect(x, y, largura, altura, 10, 10);
+
+        g2.drawLine(
+                x + largura / 2,
+                y,
+                x + largura / 2,
+                y + altura
+        );
+    }
+
+private void desenharPecasDaMesa(Graphics2D g2) {
+
+    try {
+        int largura = 120;
+        int altura = 60;
+        int espaco = 15;
+
+        java.util.ArrayList<Peca> pecas =
+                dao.buscarMesa(codigoSala);
+
+        int total = pecas.size() * (largura + espaco);
+        int x = (getWidth() - total) / 2;
+        int y = getHeight() / 2;
+
+        for (Peca p : pecas) {
+
+            g2.setColor(Color.WHITE);
+            g2.fillRoundRect(x, y, largura, altura, 15, 15);
+
+            g2.setColor(Color.BLACK);
+            g2.drawRoundRect(x, y, largura, altura, 15, 15);
+            g2.drawLine(x + largura / 2, y, x + largura / 2, y + altura);
+
+            g2.setFont(new Font("Arial", Font.BOLD, 12));
+
+            desenharTextoCentro(g2, p.getLadoEsquerdo(), x, y, largura / 2, altura);
+            desenharTextoCentro(g2, p.getLadoDireito(), x + largura / 2, y, largura / 2, altura);
+
+            x += largura + espaco;
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
+
+private void desenharTextoCentro(
+        Graphics2D g2,
+        String texto,
+        int x,
+        int y,
+        int largura,
+        int altura
+) {
+    FontMetrics fm = g2.getFontMetrics();
+
+    int textoX = x + (largura - fm.stringWidth(texto)) / 2;
+    int textoY = y + ((altura - fm.getHeight()) / 2) + fm.getAscent();
+
+    g2.drawString(texto, textoX, textoY);
+}
+}

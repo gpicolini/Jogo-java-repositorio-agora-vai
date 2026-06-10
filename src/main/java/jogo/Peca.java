@@ -2,47 +2,33 @@ package jogo;
 
 public class Peca {
 
-    private String substancia;
-    private String funcao;
-    private TipoQuimico tipo;
+    private String ladoEsquerdo;
+    private String ladoDireito;
 
-    public Peca(String substancia, String funcao, TipoQuimico tipo) {
-        this.substancia = substancia;
-        this.funcao = funcao;
-        this.tipo = tipo;
+    public Peca(String ladoEsquerdo, String ladoDireito) {
+        this.ladoEsquerdo = ladoEsquerdo;
+        this.ladoDireito = ladoDireito;
     }
 
-    public String getSubstancia() {
-        return substancia;
+    public String getLadoEsquerdo() {
+        return ladoEsquerdo;
     }
 
-    public String getFuncao() {
-        return funcao;
+    public String getLadoDireito() {
+        return ladoDireito;
     }
 
-    public TipoQuimico getTipo() {
-        return tipo;
-    }
-
-    // ===================== REGRA DE CONEXÃO =====================
     public boolean conecta(Peca outra) {
-
         if (outra == null) return false;
 
-        if (this.tipo == null || outra.tipo == null) return false;
-
-      
-        if (this.funcao.equalsIgnoreCase("Inútil") ||
-            outra.funcao.equalsIgnoreCase("Inútil")) {
-            return false;
-        }
-
-      
-        return this.tipo == outra.tipo;
+        return this.ladoEsquerdo.equalsIgnoreCase(outra.ladoEsquerdo)
+            || this.ladoEsquerdo.equalsIgnoreCase(outra.ladoDireito)
+            || this.ladoDireito.equalsIgnoreCase(outra.ladoEsquerdo)
+            || this.ladoDireito.equalsIgnoreCase(outra.ladoDireito);
     }
 
     @Override
     public String toString() {
-        return "[" + substancia + " | " + funcao + " | " + tipo + "]";
+        return "[" + ladoEsquerdo + " | " + ladoDireito + "]";
     }
 }

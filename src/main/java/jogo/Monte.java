@@ -18,62 +18,53 @@ public class Monte {
     // ===================== CONSTRUÇÃO POR NÍVEL =====================
     private void montarPorDificuldade(Dificuldade dificuldade) {
 
-        // ===== BASE DO JOGO =====
         adicionarQuimicosBasicos();
 
         if (dificuldade == Dificuldade.FACIL) {
-            // só peças boas
             return;
         }
 
         if (dificuldade == Dificuldade.MEDIO) {
-            adicionarLixo(3); // peças inúteis
+            adicionarLixo(3);
             return;
         }
 
         if (dificuldade == Dificuldade.DIFICIL) {
-            adicionarLixo(6); // muito mais ruído
+            adicionarLixo(6);
         }
     }
 
     // ===================== PEÇAS VÁLIDAS =====================
- private void adicionarQuimicosBasicos() {
+    private void adicionarQuimicosBasicos() {
 
-    // ===== ÁCIDOS =====
-    pecas.add(new Peca("HCl", "Ácido", TipoQuimico.ACIDO));
-    pecas.add(new Peca("H2SO4", "Ácido", TipoQuimico.ACIDO));
-    pecas.add(new Peca("HNO3", "Ácido", TipoQuimico.ACIDO));
+        // ÁCIDOS
+        pecas.add(new Peca("HCl", "H2SO4"));
+        pecas.add(new Peca("H2SO4", "HNO3"));
+        pecas.add(new Peca("HNO3", "HCl"));
 
-    // ===== BASES =====
-    pecas.add(new Peca("NaOH", "Base", TipoQuimico.BASE));
-    pecas.add(new Peca("KOH", "Base", TipoQuimico.BASE));
-    pecas.add(new Peca("LiOH", "Base", TipoQuimico.BASE));
+        // BASES
+        pecas.add(new Peca("NaOH", "KOH"));
+        pecas.add(new Peca("KOH", "LiOH"));
+        pecas.add(new Peca("LiOH", "NaOH"));
 
-    // ===== ÓXIDOS =====
-    pecas.add(new Peca("CO2", "Óxido", TipoQuimico.OXIDO));
-    pecas.add(new Peca("SO3", "Óxido", TipoQuimico.OXIDO));
-    pecas.add(new Peca("CaO", "Óxido", TipoQuimico.OXIDO));
+        // ÓXIDOS
+        pecas.add(new Peca("CO2", "SO3"));
+        pecas.add(new Peca("SO3", "CaO"));
+        pecas.add(new Peca("CaO", "CO2"));
 
-    // ===== SAIS =====
-    pecas.add(new Peca("NaCl", "Sal", TipoQuimico.SAL));
-    pecas.add(new Peca("KBr", "Sal", TipoQuimico.SAL));
-    pecas.add(new Peca("CaCO3", "Sal", TipoQuimico.SAL));
-}
+        // SAIS
+        pecas.add(new Peca("NaCl", "KBr"));
+        pecas.add(new Peca("KBr", "CaCO3"));
+        pecas.add(new Peca("CaCO3", "NaCl"));
+    }
 
     // ===================== LIXO CONTROLADO =====================
-  private void adicionarLixo(int quantidade) {
+    private void adicionarLixo(int quantidade) {
 
-    for (int i = 0; i < quantidade; i++) {
-
-        pecas.add(
-            new Peca(
-                "X" + (i + 1),
-                "Inútil",
-                TipoQuimico.SAL
-            )
-        );
+        for (int i = 0; i < quantidade; i++) {
+            pecas.add(new Peca("X" + (i + 1), "X" + (i + 2)));
+        }
     }
-}
 
     // ===================== EMBARALHAR =====================
     public void embaralhar() {

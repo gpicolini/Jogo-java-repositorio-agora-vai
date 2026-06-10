@@ -6,14 +6,17 @@ import java.sql.SQLException;
 
 public class Jogo {
 
-    private static final String URL = "jdbc:mysql://trolley.proxy.rlwy.net:52251/railway?useSSL=false&serverTimezone=UTC";
+    private static final String URL =
+            "jdbc:mysql://trolley.proxy.rlwy.net:52251/railway?useSSL=false&serverTimezone=UTC";
+
     private static final String USER = "root";
-    private static final String PASSWORD = "TUEbJashZWrUFTRZyBeIYBXtUZEUILVG";
+
+    private static final String PASSWORD =
+            "TUEbJashZWrUFTRZyBeIYBXtUZEUILVG";
 
     public Connection conn;
 
     public TelaCadastro Cadastro;
-
     public TelaLogin Login;
 
     public Jogo() throws SQLException {
@@ -29,7 +32,6 @@ public class Jogo {
         System.out.println("Conexão estabelecida com sucesso!");
 
         Cadastro = new TelaCadastro(this);
-
         Cadastro.Show();
     }
 
@@ -37,7 +39,6 @@ public class Jogo {
 
         System.out.println("Jogador logado: " + nome);
 
-        new TelaJogo(nome, Dificuldade.FACIL);
-
+        new TelaSala(nome, Dificuldade.FACIL);
     }
 }

@@ -7,14 +7,13 @@ public class TelaJogo extends JFrame {
 
     private Partida partida;
 
-    private JTextArea areaTabuleiro;
-    private DefaultListModel<String> modeloLista;
-    private JList<String> listaPecas;
+    private PainelMesa painelMesa;
+    private PainelMao painelMao;
 
     private JLabel lblPontuacao;
     private JLabel lblMensagem;
+    private JLabel lblVez;
 
-    // ÁUDIO
     private javax.sound.sampled.Clip musicaFundo;
     private boolean musicaLigada = true;
 
@@ -23,13 +22,11 @@ public class TelaJogo extends JFrame {
 
     private JSlider sliderVolume;
 
-    // PROGRESSÃO
     private int xp = 0;
     private int xpParaProximoNivel = 3;
 
     private Dificuldade dificuldade;
 
-    // ===================== CONSTRUTOR =====================
     public TelaJogo(String nomeJogador, Dificuldade dificuldade) {
 
         this.dificuldade = dificuldade;
@@ -43,42 +40,31 @@ public class TelaJogo extends JFrame {
 
         getContentPane().setBackground(new Color(35, 35, 35));
 
-        // TOPO
         JLabel titulo = new JLabel("🧪 DOMINÓ QUÍMICO", SwingConstants.CENTER);
         titulo.setFont(new Font("Arial", Font.BOLD, 28));
+        titulo.setForeground(Color.WHITE);
+
+        lblVez = new JLabel("", SwingConstants.CENTER);
+        lblVez.setFont(new Font("Arial", Font.BOLD, 18));
+        lblVez.setForeground(Color.CYAN);
 
         lblMensagem = new JLabel("", SwingConstants.CENTER);
         lblMensagem.setFont(new Font("Arial", Font.BOLD, 18));
         lblMensagem.setForeground(Color.WHITE);
 
-        JPanel painelTopo = new JPanel(new BorderLayout());
+        JPanel painelTopo = new JPanel(new GridLayout(3, 1));
         painelTopo.setBackground(new Color(35, 35, 35));
-        painelTopo.add(titulo, BorderLayout.NORTH);
-        painelTopo.add(lblMensagem, BorderLayout.SOUTH);
+        painelTopo.add(titulo);
+        painelTopo.add(lblVez);
+        painelTopo.add(lblMensagem);
 
         add(painelTopo, BorderLayout.NORTH);
 
-        // TABULEIRO
-        areaTabuleiro = new JTextArea();
-        areaTabuleiro.setEditable(false);
-        areaTabuleiro.setFont(new Font("Consolas", Font.BOLD, 24));
-        areaTabuleiro.setBackground(new Color(45, 45, 45));
-        areaTabuleiro.setForeground(Color.WHITE);
+        painelMesa = new PainelMesa(partida);
+        add(painelMesa, BorderLayout.CENTER);
 
-        add(new JScrollPane(areaTabuleiro), BorderLayout.CENTER);
+        painelMao = new PainelMao(partida);
 
-        // MÃO
-        modeloLista = new DefaultListModel<>();
-        listaPecas = new JList<>(modeloLista);
-
-        listaPecas.setFont(new Font("Arial", Font.BOLD, 16));
-        listaPecas.setFixedCellHeight(35);
-        listaPecas.setBackground(new Color(50, 50, 50));
-        listaPecas.setForeground(Color.WHITE);
-
-        add(new JScrollPane(listaPecas), BorderLayout.WEST);
-
-        // CONTROLES
         JPanel painelSul = new JPanel();
 
         JButton btnEsquerda = new JButton("Esquerda");
@@ -96,15 +82,28 @@ public class TelaJogo extends JFrame {
         painelSul.add(sliderVolume);
         painelSul.add(btnMute);
 
-        add(painelSul, BorderLayout.SOUTH);
+        JPanel painelInferior = new JPanel(new BorderLayout());
+        painelInferior.add(painelMao, BorderLayout.CENTER);
+        painelInferior.add(painelSul, BorderLayout.SOUTH);
 
-        // EVENTOS
+        add(painelInferior, BorderLayout.SOUTH);
+
         btnEsquerda.addActionListener(e -> jogar(false));
         btnDireita.addActionListener(e -> jogar(true));
 
         btnComprar.addActionListener(e -> {
-            partida.comprarPeca();
-            tocarSom("/jogo/sounds/effects.wav/compra.wav");
+            boolean comprou = partida.comprarPeca();
+
+            if (comprou) {
+                painelMao.limparSelecao();
+                tocarSom("/jogo/sounds/effects.wav/compra.wav");
+            } else {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "❌ Sem compras restantes!"
+                );
+            }
+
             atualizarTela();
         });
 
@@ -112,8 +111,13 @@ public class TelaJogo extends JFrame {
             musicaLigada = !musicaLigada;
 
             if (musicaFundo != null) {
-                if (musicaLigada) musicaFundo.start();
-                else musicaFundo.stop();
+                if (musicaLigada) {
+                    musicaFundo.start();
+                    btnMute.setText("🔊");
+                } else {
+                    musicaFundo.stop();
+                    btnMute.setText("🔇");
+                }
             }
         });
 
@@ -129,62 +133,62 @@ public class TelaJogo extends JFrame {
         setVisible(true);
     }
 
-    // ===================== JOGAR =====================
     private void jogar(boolean direita) {
 
-    int indice = listaPecas.getSelectedIndex();
+        int indice = painelMao.getIndiceSelecionado();
 
-    if (indice == -1) {
-        JOptionPane.showMessageDialog(this, "Selecione uma peça!");
-        return;
-    }
-
-    boolean sucesso = partida.jogarPeca(indice, direita);
-
-    if (sucesso) {
-
-        lblMensagem.setText("✅ Jogada correta!");
-        lblMensagem.setForeground(new Color(0, 180, 0));
-
-        tocarSom("/jogo/sounds/effects.wav/acerto.wav");
-
-        if (dificuldade == Dificuldade.FACIL) xp += 2;
-        else xp += 1;
-
-        if (xp >= xpParaProximoNivel) {
-            xp = 0;
-            xpParaProximoNivel += 2;
-
-            lblMensagem.setText("🔥 LEVEL UP!");
-            lblMensagem.setForeground(Color.YELLOW);
+        if (indice == -1) {
+            JOptionPane.showMessageDialog(this, "Selecione uma peça!");
+            return;
         }
 
-    } else {
+        boolean sucesso = partida.jogarPeca(indice, direita);
+        painelMao.limparSelecao();
 
-        lblMensagem.setText("❌ Jogada inválida!");
-        lblMensagem.setForeground(Color.RED);
+        if (sucesso) {
 
-        tocarSom("/jogo/sounds/effects.wav/erro.wav");
+            lblMensagem.setText("✅ Jogada correta!");
+            lblMensagem.setForeground(new Color(0, 180, 0));
+
+            tocarSom("/jogo/sounds/effects.wav/acerto.wav");
+
+            if (dificuldade == Dificuldade.FACIL) xp += 2;
+            else xp += 1;
+
+            if (xp >= xpParaProximoNivel) {
+                xp = 0;
+                xpParaProximoNivel += 2;
+
+                lblMensagem.setText("🔥 LEVEL UP!");
+                lblMensagem.setForeground(Color.YELLOW);
+            }
+
+        } else {
+
+            lblMensagem.setText("❌ Jogada inválida!");
+            lblMensagem.setForeground(Color.RED);
+
+            tocarSom("/jogo/sounds/effects.wav/erro.wav");
+        }
+
+        boolean mudouFase = partida.atualizarFaseSeNecessario();
+
+        if (mudouFase) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "🎉 " + partida.getUltimoVencedorFase() +
+                            " venceu a fase!\n\n" +
+                            "Fase " + partida.getFase() + " iniciada!"
+            );
+
+            lblMensagem.setText("🚀 Fase " + partida.getFase());
+            lblMensagem.setForeground(Color.CYAN);
+        }
+
+        atualizarTela();
+        verificarFim();
     }
 
-    // verifica mudança de fase
-    boolean mudouFase = partida.atualizarFaseSeNecessario();
-
-    if (mudouFase) {
-
-        JOptionPane.showMessageDialog(
-                this,
-                "🎉 Fase " + partida.getFase() + " iniciada!"
-        );
-
-        lblMensagem.setText("🚀 Fase " + partida.getFase());
-        lblMensagem.setForeground(Color.CYAN);
-    }
-
-    atualizarTela();
-    verificarFim();
-}
-    // ===================== FIM =====================
     private void verificarFim() {
 
         if (partida.terminouJogo()) {
@@ -195,52 +199,50 @@ public class TelaJogo extends JFrame {
 
             tocarSom("/jogo/sounds/vitoria.wav/musicavitoria.wav");
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    "🏆 FIM DE JOGO!\nPontuação: " +
-                    partida.getPontuacao().getPontuacaoTotal()
-            );
+            StringBuilder sb = new StringBuilder();
+
+            sb.append("🏆 FIM DE JOGO!\n\n");
+            sb.append("Vencedor: ").append(partida.getNomeVencedor()).append("\n\n");
+
+            for (int i = 0; i < partida.getJogadores().size(); i++) {
+                sb.append(partida.getJogadores().get(i).getNome())
+                  .append(": ")
+                  .append(partida.getPontosJogador(i))
+                  .append(" pontos\n");
+            }
+
+            JOptionPane.showMessageDialog(this, sb.toString());
         }
     }
 
-    // ===================== ATUALIZAR =====================
     private void atualizarTela() {
 
-    modeloLista.clear();
+        painelMao.repaint();
+        painelMesa.repaint();
 
-    for (Peca p : partida.getJogador().getMao()) {
+        lblVez.setText(
+                "🎮 Vez de: " +
+                        partida.getJogadorAtual().getNome()
+        );
 
-        if (partida.getFase() == 1) {
+        StringBuilder placar = new StringBuilder();
 
-            modeloLista.addElement(
-                    p.getSubstancia() + " - " + p.getFuncao()
-            );
+        for (int i = 0; i < partida.getJogadores().size(); i++) {
+            placar.append(partida.getJogadores().get(i).getNome())
+                  .append(": ")
+                  .append(partida.getPontosJogador(i));
 
-        } else {
-
-            modeloLista.addElement(
-                    p.getSubstancia()
-            );
+            if (i < partida.getJogadores().size() - 1) {
+                placar.append(" | ");
+            }
         }
+
+        placar.append(" | Compras: ")
+              .append(partida.getComprasRestantes());
+
+        lblPontuacao.setText(placar.toString());
     }
 
-    StringBuilder sb = new StringBuilder();
-
-    for (Peca p : partida.getTabuleiro().getPecas()) {
-        sb.append("[")
-          .append(p.getSubstancia())
-          .append("] ");
-    }
-
-    areaTabuleiro.setText(sb.toString());
-
-    lblPontuacao.setText(
-            "Pontuação: " +
-            partida.getPontuacao().getPontuacaoTotal()
-    );
-}
-
-    // ===================== SOM =====================
     private void tocarSom(String caminho) {
         new Thread(() -> {
             try {
@@ -255,7 +257,7 @@ public class TelaJogo extends JFrame {
 
                 clip.open(audioIn);
 
-                float dB = (float)(Math.log10(Math.max(volumeEfeitos, 0.0001)) * 20);
+                float dB = (float) (Math.log10(Math.max(volumeEfeitos, 0.0001)) * 20);
 
                 ((javax.sound.sampled.FloatControl)
                         clip.getControl(javax.sound.sampled.FloatControl.Type.MASTER_GAIN))
@@ -269,7 +271,6 @@ public class TelaJogo extends JFrame {
         }).start();
     }
 
-    // ===================== MÚSICA =====================
     private void tocarMusica(String caminho) {
 
         try {
@@ -301,7 +302,7 @@ public class TelaJogo extends JFrame {
                             musicaFundo.getControl(javax.sound.sampled.FloatControl.Type.MASTER_GAIN);
 
             float volume = Math.max(volumeMusica, 0.0001f);
-            float dB = (float)(Math.log10(volume) * 20);
+            float dB = (float) (Math.log10(volume) * 20);
 
             gain.setValue(dB);
 
