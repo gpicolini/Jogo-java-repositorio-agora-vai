@@ -37,28 +37,43 @@ public class Monte {
     }
 
     // ===================== PEÇAS VÁLIDAS =====================
-    private void adicionarQuimicosBasicos() {
+ private void adicionarQuimicosBasicos() {
 
+    // ===== ÁCIDOS =====
     pecas.add(new Peca("HCl", "Ácido", TipoQuimico.ACIDO));
     pecas.add(new Peca("H2SO4", "Ácido", TipoQuimico.ACIDO));
+    pecas.add(new Peca("HNO3", "Ácido", TipoQuimico.ACIDO));
 
+    // ===== BASES =====
     pecas.add(new Peca("NaOH", "Base", TipoQuimico.BASE));
     pecas.add(new Peca("KOH", "Base", TipoQuimico.BASE));
+    pecas.add(new Peca("LiOH", "Base", TipoQuimico.BASE));
 
+    // ===== ÓXIDOS =====
     pecas.add(new Peca("CO2", "Óxido", TipoQuimico.OXIDO));
     pecas.add(new Peca("SO3", "Óxido", TipoQuimico.OXIDO));
+    pecas.add(new Peca("CaO", "Óxido", TipoQuimico.OXIDO));
 
+    // ===== SAIS =====
     pecas.add(new Peca("NaCl", "Sal", TipoQuimico.SAL));
     pecas.add(new Peca("KBr", "Sal", TipoQuimico.SAL));
-    }
+    pecas.add(new Peca("CaCO3", "Sal", TipoQuimico.SAL));
+}
 
     // ===================== LIXO CONTROLADO =====================
-    private void adicionarLixo(int quantidade) {
+  private void adicionarLixo(int quantidade) {
 
-        for (int i = 0; i < quantidade; i++) {
-            pecas.add(new Peca("X" + i, "Inútil", TipoQuimico.SAL));
-        }
+    for (int i = 0; i < quantidade; i++) {
+
+        pecas.add(
+            new Peca(
+                "X" + (i + 1),
+                "Inútil",
+                TipoQuimico.SAL
+            )
+        );
     }
+}
 
     // ===================== EMBARALHAR =====================
     public void embaralhar() {

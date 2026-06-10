@@ -14,7 +14,7 @@ public class TelaJogo extends JFrame {
     private JLabel lblPontuacao;
     private JLabel lblMensagem;
 
-    // ===================== ÁUDIO =====================
+    // ÁUDIO
     private javax.sound.sampled.Clip musicaFundo;
     private boolean musicaLigada = true;
 
@@ -23,7 +23,7 @@ public class TelaJogo extends JFrame {
 
     private JSlider sliderVolume;
 
-    // ===================== PROGRESSÃO =====================
+    // PROGRESSÃO
     private int xp = 0;
     private int xpParaProximoNivel = 3;
 
@@ -43,10 +43,9 @@ public class TelaJogo extends JFrame {
 
         getContentPane().setBackground(new Color(35, 35, 35));
 
-        // ===================== TOPO =====================
-        JLabel titulo = new JLabel("🧪 DOMINÓ QUÍMICO");
+        // TOPO
+        JLabel titulo = new JLabel("🧪 DOMINÓ QUÍMICO", SwingConstants.CENTER);
         titulo.setFont(new Font("Arial", Font.BOLD, 28));
-        titulo.setHorizontalAlignment(SwingConstants.CENTER);
 
         lblMensagem = new JLabel("", SwingConstants.CENTER);
         lblMensagem.setFont(new Font("Arial", Font.BOLD, 18));
@@ -59,7 +58,7 @@ public class TelaJogo extends JFrame {
 
         add(painelTopo, BorderLayout.NORTH);
 
-        // ===================== TABULEIRO =====================
+        // TABULEIRO
         areaTabuleiro = new JTextArea();
         areaTabuleiro.setEditable(false);
         areaTabuleiro.setFont(new Font("Consolas", Font.BOLD, 24));
@@ -68,7 +67,7 @@ public class TelaJogo extends JFrame {
 
         add(new JScrollPane(areaTabuleiro), BorderLayout.CENTER);
 
-        // ===================== MÃO =====================
+        // MÃO
         modeloLista = new DefaultListModel<>();
         listaPecas = new JList<>(modeloLista);
 
@@ -79,7 +78,7 @@ public class TelaJogo extends JFrame {
 
         add(new JScrollPane(listaPecas), BorderLayout.WEST);
 
-        // ===================== CONTROLES =====================
+        // CONTROLES
         JPanel painelSul = new JPanel();
 
         JButton btnEsquerda = new JButton("Esquerda");
@@ -88,8 +87,6 @@ public class TelaJogo extends JFrame {
         JButton btnMute = new JButton("🔊");
 
         lblPontuacao = new JLabel("Pontuação: 0");
-
-        
         sliderVolume = new JSlider(0, 100, 70);
 
         painelSul.add(btnEsquerda);
@@ -101,8 +98,7 @@ public class TelaJogo extends JFrame {
 
         add(painelSul, BorderLayout.SOUTH);
 
-        // ===================== EVENTOS =====================
-
+        // EVENTOS
         btnEsquerda.addActionListener(e -> jogar(false));
         btnDireita.addActionListener(e -> jogar(true));
 
@@ -116,27 +112,18 @@ public class TelaJogo extends JFrame {
             musicaLigada = !musicaLigada;
 
             if (musicaFundo != null) {
-                if (musicaLigada) {
-                    musicaFundo.start();
-                    btnMute.setText("🔊");
-                } else {
-                    musicaFundo.stop();
-                    btnMute.setText("🔇");
-                }
+                if (musicaLigada) musicaFundo.start();
+                else musicaFundo.stop();
             }
         });
 
-        
         sliderVolume.addChangeListener(e -> {
-
             volumeEfeitos = sliderVolume.getValue() / 100f;
             volumeMusica = volumeEfeitos;
-
             ajustarVolumeMusica();
         });
 
         atualizarTela();
-
         tocarMusica("/jogo/sounds/music.wav/fundo.wav");
 
         setVisible(true);
@@ -145,49 +132,62 @@ public class TelaJogo extends JFrame {
     // ===================== JOGAR =====================
     private void jogar(boolean direita) {
 
-        int indice = listaPecas.getSelectedIndex();
+    int indice = listaPecas.getSelectedIndex();
 
-        if (indice == -1) {
-            JOptionPane.showMessageDialog(this, "Selecione uma peça!");
-            return;
-        }
-
-        boolean sucesso = partida.jogarPeca(indice, direita);
-
-        if (sucesso) {
-
-            lblMensagem.setText("✅ Jogada correta!");
-            lblMensagem.setForeground(new Color(0, 180, 0));
-
-            tocarSom("/jogo/sounds/effects.wav/acerto.wav");
-
-            if (dificuldade == Dificuldade.FACIL) xp += 2;
-            else xp += 1;
-
-            if (xp >= xpParaProximoNivel) {
-                xp = 0;
-                xpParaProximoNivel += 2;
-
-                lblMensagem.setText("🔥 LEVEL UP!");
-                lblMensagem.setForeground(Color.YELLOW);
-            }
-
-        } else {
-
-            lblMensagem.setText("❌ Jogada inválida!");
-            lblMensagem.setForeground(Color.RED);
-
-            tocarSom("/jogo/sounds/effects.wav/erro.wav");
-        }
-
-        atualizarTela();
-        verificarFim();
+    if (indice == -1) {
+        JOptionPane.showMessageDialog(this, "Selecione uma peça!");
+        return;
     }
 
+    boolean sucesso = partida.jogarPeca(indice, direita);
+
+    if (sucesso) {
+
+        lblMensagem.setText("✅ Jogada correta!");
+        lblMensagem.setForeground(new Color(0, 180, 0));
+
+        tocarSom("/jogo/sounds/effects.wav/acerto.wav");
+
+        if (dificuldade == Dificuldade.FACIL) xp += 2;
+        else xp += 1;
+
+        if (xp >= xpParaProximoNivel) {
+            xp = 0;
+            xpParaProximoNivel += 2;
+
+            lblMensagem.setText("🔥 LEVEL UP!");
+            lblMensagem.setForeground(Color.YELLOW);
+        }
+
+    } else {
+
+        lblMensagem.setText("❌ Jogada inválida!");
+        lblMensagem.setForeground(Color.RED);
+
+        tocarSom("/jogo/sounds/effects.wav/erro.wav");
+    }
+
+    // verifica mudança de fase
+    boolean mudouFase = partida.atualizarFaseSeNecessario();
+
+    if (mudouFase) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "🎉 Fase " + partida.getFase() + " iniciada!"
+        );
+
+        lblMensagem.setText("🚀 Fase " + partida.getFase());
+        lblMensagem.setForeground(Color.CYAN);
+    }
+
+    atualizarTela();
+    verificarFim();
+}
     // ===================== FIM =====================
     private void verificarFim() {
 
-        if (partida.terminou()) {
+        if (partida.terminouJogo()) {
 
             partida.finalizar();
 
@@ -198,7 +198,7 @@ public class TelaJogo extends JFrame {
             JOptionPane.showMessageDialog(
                     this,
                     "🏆 FIM DE JOGO!\nPontuação: " +
-                            partida.getPontuacao().getPontuacaoTotal()
+                    partida.getPontuacao().getPontuacaoTotal()
             );
         }
     }
@@ -206,28 +206,42 @@ public class TelaJogo extends JFrame {
     // ===================== ATUALIZAR =====================
     private void atualizarTela() {
 
-        modeloLista.clear();
+    modeloLista.clear();
 
-        for (Peca p : partida.getJogador().getMao()) {
-            modeloLista.addElement(p.getSubstancia() + " - " + p.getFuncao());
+    for (Peca p : partida.getJogador().getMao()) {
+
+        if (partida.getFase() == 1) {
+
+            modeloLista.addElement(
+                    p.getSubstancia() + " - " + p.getFuncao()
+            );
+
+        } else {
+
+            modeloLista.addElement(
+                    p.getSubstancia()
+            );
         }
-
-        StringBuilder sb = new StringBuilder();
-
-        for (Peca p : partida.getTabuleiro().getPecas()) {
-            sb.append("[").append(p.getSubstancia()).append("] ");
-        }
-
-        areaTabuleiro.setText(sb.toString());
-
-        lblPontuacao.setText(
-                "Pontuação: " + partida.getPontuacao().getPontuacaoTotal()
-        );
     }
+
+    StringBuilder sb = new StringBuilder();
+
+    for (Peca p : partida.getTabuleiro().getPecas()) {
+        sb.append("[")
+          .append(p.getSubstancia())
+          .append("] ");
+    }
+
+    areaTabuleiro.setText(sb.toString());
+
+    lblPontuacao.setText(
+            "Pontuação: " +
+            partida.getPontuacao().getPontuacaoTotal()
+    );
+}
 
     // ===================== SOM =====================
     private void tocarSom(String caminho) {
-
         new Thread(() -> {
             try {
                 java.io.InputStream audioSrc = getClass().getResourceAsStream(caminho);
@@ -269,7 +283,6 @@ public class TelaJogo extends JFrame {
             musicaFundo.open(audioIn);
 
             ajustarVolumeMusica();
-
             musicaFundo.loop(javax.sound.sampled.Clip.LOOP_CONTINUOUSLY);
             musicaFundo.start();
 
@@ -297,4 +310,3 @@ public class TelaJogo extends JFrame {
         }
     }
 }
-

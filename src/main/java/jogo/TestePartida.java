@@ -20,32 +20,38 @@ public class TestePartida {
         int jogadas = 0;
         int compras = 0;
 
-        // loop até acabar
-        while (!partida.terminou()) {
+        int seguranca = 0;
+
+        // roda até o jogo acabar (não só fase)
+        while (!partida.terminouJogo() && seguranca < 500) {
 
             boolean jogou = false;
 
-            // tenta jogar todas peças da mão
-            for (int i = 0; i < partida.getJogador().getMao().size(); i++) {
+            int tamanhoMao = partida.getJogador().getMao().size();
 
-                if (partida.jogarPeca(i, true) || partida.jogarPeca(i, false)) {
-                    jogou = true;
+            for (int i = 0; i < tamanhoMao; i++) {
+
+                // tenta direita primeiro (mais comum)
+                if (partida.jogarPeca(i, true)) {
                     jogadas++;
+                    jogou = true;
+                    break;
+                }
+
+                // tenta esquerda se falhar
+                if (partida.jogarPeca(i, false)) {
+                    jogadas++;
+                    jogou = true;
                     break;
                 }
             }
 
-            // se não conseguiu jogar, compra
             if (!jogou) {
                 partida.comprarPeca();
                 compras++;
             }
 
-            // segurança pra evitar loop infinito
-            if (compras > 50) {
-                System.out.println("⚠️ travou em compras, abortando...");
-                break;
-            }
+            seguranca++;
         }
 
         partida.finalizar();
