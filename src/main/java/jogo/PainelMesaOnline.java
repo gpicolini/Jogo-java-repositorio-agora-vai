@@ -1,9 +1,7 @@
 package jogo;
 
 import java.awt.*;
-
-import javax.swing.ImageIcon;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 public class PainelMesaOnline extends JPanel {
 
@@ -12,82 +10,164 @@ public class PainelMesaOnline extends JPanel {
     private int minhaOrdem;
     private String nomeJogador;
 
+    private int qtdJogadoresCache = 0;
+    private int jogadorAtualCache = 0;
+
+    private java.util.ArrayList<Peca> pecasMesaCache =
+            new java.util.ArrayList<>();
+
+    private Image fundoLab;
+
+    private final Font fontePeca =
+            new Font(
+                    "Arial",
+                    Font.BOLD,
+                    12
+            );
+
     public PainelMesaOnline(
             PartidaOnlineDAO dao,
             String codigoSala,
             int minhaOrdem,
             String nomeJogador
     ) {
+
         this.dao = dao;
         this.codigoSala = codigoSala;
         this.minhaOrdem = minhaOrdem;
         this.nomeJogador = nomeJogador;
 
-        setBackground(new Color(30, 30, 30));
+        setBackground(
+                new Color(
+                        30,
+                        30,
+                        30
+                )
+        );
+
+        try {
+
+            java.net.URL url =
+                    getClass().getResource(
+                            "/jogo/images/lab.png"
+                    );
+
+            if (url != null) {
+
+                fundoLab =
+                        new ImageIcon(url)
+                                .getImage();
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
     }
 
     @Override
-protected void paintComponent(Graphics g) {
+    protected void paintComponent(Graphics g) {
 
-    super.paintComponent(g);
+        super.paintComponent(g);
 
-    Graphics2D g2 = (Graphics2D) g;
+        Graphics2D g2 =
+                (Graphics2D) g;
 
-    g2.setRenderingHint(
-            RenderingHints.KEY_ANTIALIASING,
-            RenderingHints.VALUE_ANTIALIAS_ON
-    );
-
-    java.net.URL urlFundo =
-            getClass().getResource("/jogo/images/lab.png");
-
-    if (urlFundo != null) {
-        ImageIcon fundo = new ImageIcon(urlFundo);
-
-        g2.drawImage(
-                fundo.getImage(),
-                0,
-                0,
-                getWidth(),
-                getHeight(),
-                this
+        g2.setRenderingHint(
+                RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON
         );
-    } else {
-        g2.setColor(new Color(30, 30, 30));
-        g2.fillRect(0, 0, getWidth(), getHeight());
-        System.out.println("Imagem lab.png não encontrada!");
+
+        if (fundoLab != null) {
+
+            g2.drawImage(
+                    fundoLab,
+                    0,
+                    0,
+                    getWidth(),
+                    getHeight(),
+                    this
+            );
+
+        } else {
+
+            g2.setColor(
+                    new Color(
+                            30,
+                            30,
+                            30
+                    )
+            );
+
+            g2.fillRect(
+                    0,
+                    0,
+                    getWidth(),
+                    getHeight()
+            );
+        }
+
+        int larguraMesa = 900;
+        int alturaMesa = 500;
+
+        int xMesa =
+                (getWidth() - larguraMesa) / 2;
+
+        int yMesa =
+                (getHeight() - alturaMesa) / 2;
+
+        g2.setColor(
+                new Color(
+                        110,
+                        0,
+                        0,
+                        220
+                )
+        );
+
+        g2.fillRoundRect(
+                xMesa,
+                yMesa,
+                larguraMesa,
+                alturaMesa,
+                45,
+                45
+        );
+
+        g2.setColor(
+                new Color(
+                        90,
+                        150,
+                        25,
+                        235
+                )
+        );
+
+        g2.fillRoundRect(
+                xMesa + 35,
+                yMesa + 45,
+                larguraMesa - 70,
+                alturaMesa - 90,
+                35,
+                35
+        );
+
+        desenharMonte(
+                g2,
+                xMesa,
+                yMesa
+        );
+
+        desenharJogadores(
+                g2,
+                xMesa,
+                yMesa,
+                larguraMesa,
+                alturaMesa
+        );
+
+        desenharPecasDaMesa(g2);
     }
-
-    int larguraMesa = 900;
-    int alturaMesa = 500;
-
-    int xMesa = (getWidth() - larguraMesa) / 2;
-    int yMesa = (getHeight() - alturaMesa) / 2;
-
-    g2.setColor(new Color(110, 0, 0, 220));
-    g2.fillRoundRect(
-            xMesa,
-            yMesa,
-            larguraMesa,
-            alturaMesa,
-            45,
-            45
-    );
-
-    g2.setColor(new Color(90, 150, 25, 235));
-    g2.fillRoundRect(
-            xMesa + 35,
-            yMesa + 45,
-            larguraMesa - 70,
-            alturaMesa - 90,
-            35,
-            35
-    );
-
-    desenharMonte(g2, xMesa, yMesa);
-    desenharJogadores(g2, xMesa, yMesa, larguraMesa, alturaMesa);
-    desenharPecasDaMesa(g2);
-}
 
     private void desenharMonte(Graphics2D g2, int xMesa, int yMesa) {
 
@@ -107,6 +187,27 @@ protected void paintComponent(Graphics g) {
         g2.drawString("Monte", x - 2, y + 95);
     }
 
+    public void atualizarCache(
+        int qtdJogadores,
+        int jogadorAtual,
+        java.util.ArrayList<Peca> pecasMesa)     
+    {
+
+    this.qtdJogadoresCache = qtdJogadores;
+    this.jogadorAtualCache = jogadorAtual;
+    if (pecasMesa != null) {
+
+    this.pecasMesaCache.clear();
+
+    this.pecasMesaCache.addAll(
+            pecasMesa
+    );
+
+}
+
+repaint();
+    }
+
     private void desenharJogadores(
             Graphics2D g2,
             int xMesa,
@@ -115,8 +216,8 @@ protected void paintComponent(Graphics g) {
             int alturaMesa
     ) {
 
-        int qtd = dao.getQuantidadeJogadores(codigoSala);
-        int jogadorAtual = dao.getIndiceJogadorAtual(codigoSala);
+        int qtd = qtdJogadoresCache;
+        int jogadorAtual = jogadorAtualCache;
 
         int[][] posicoes = {
                 {xMesa + larguraMesa / 2, yMesa + 35},
@@ -183,35 +284,80 @@ protected void paintComponent(Graphics g) {
 private void desenharPecasDaMesa(Graphics2D g2) {
 
     try {
+
         int largura = 120;
         int altura = 60;
         int espaco = 15;
 
         java.util.ArrayList<Peca> pecas =
-                dao.buscarMesa(codigoSala);
+                pecasMesaCache;
 
-        int total = pecas.size() * (largura + espaco);
-        int x = (getWidth() - total) / 2;
-        int y = getHeight() / 2;
+        int total =
+                pecas.size() * (largura + espaco);
+
+        int x =
+                (getWidth() - total) / 2;
+
+        int y =
+                getHeight() / 2;
 
         for (Peca p : pecas) {
 
             g2.setColor(Color.WHITE);
-            g2.fillRoundRect(x, y, largura, altura, 15, 15);
+
+            g2.fillRoundRect(
+                    x,
+                    y,
+                    largura,
+                    altura,
+                    15,
+                    15
+            );
 
             g2.setColor(Color.BLACK);
-            g2.drawRoundRect(x, y, largura, altura, 15, 15);
-            g2.drawLine(x + largura / 2, y, x + largura / 2, y + altura);
 
-            g2.setFont(new Font("Arial", Font.BOLD, 12));
+            g2.drawRoundRect(
+                    x,
+                    y,
+                    largura,
+                    altura,
+                    15,
+                    15
+            );
 
-            desenharTextoCentro(g2, p.getLadoEsquerdo(), x, y, largura / 2, altura);
-            desenharTextoCentro(g2, p.getLadoDireito(), x + largura / 2, y, largura / 2, altura);
+            g2.drawLine(
+                    x + largura / 2,
+                    y,
+                    x + largura / 2,
+                    y + altura
+            );
+
+            // ← TROCOU SÓ ISSO
+            g2.setFont(fontePeca);
+
+            desenharTextoCentro(
+                    g2,
+                    p.getLadoEsquerdo(),
+                    x,
+                    y,
+                    largura / 2,
+                    altura
+            );
+
+            desenharTextoCentro(
+                    g2,
+                    p.getLadoDireito(),
+                    x + largura / 2,
+                    y,
+                    largura / 2,
+                    altura
+            );
 
             x += largura + espaco;
         }
 
     } catch (Exception e) {
+
         e.printStackTrace();
     }
 }
@@ -231,4 +377,14 @@ private void desenharTextoCentro(
 
     g2.drawString(texto, textoX, textoY);
 }
+
+public void adicionarPecaLocal(Peca p) {
+
+    pecasMesaCache.add(p);
+
+    revalidate();
+
+    repaint();
+}
+
 }

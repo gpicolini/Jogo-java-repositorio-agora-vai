@@ -11,88 +11,418 @@ public class TelaMenu extends JFrame {
 
         this.nome = nome;
 
-        setTitle("Dominó Químico");
-        setSize(700, 470);
-        setLocationRelativeTo(null);
+        setUndecorated(true);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(null);
-        getContentPane().setBackground(Color.WHITE);
 
-        Color vinho = new Color(125, 15, 35);
+        JPanel fundo = new JPanel(null) {
 
-        JLabel titulo = new JLabel("DOMINÓ QUÍMICO", SwingConstants.CENTER);
-        titulo.setBounds(0, 20, 700, 45);
-        titulo.setFont(new Font("Segoe UI", Font.BOLD, 34));
-        titulo.setForeground(vinho);
-        add(titulo);
+            protected void paintComponent(Graphics g) {
 
-        JPanel card = new JPanel(null);
-        card.setBounds(95, 75, 510, 320);
-        card.setBackground(Color.WHITE);
-        add(card);
+                super.paintComponent(g);
 
-        JLabel domino = new JLabel("▯");
-        domino.setFont(new Font("Arial", Font.BOLD, 58));
-        domino.setForeground(Color.BLACK);
-        domino.setBounds(55, 45, 90, 90);
-        card.add(domino);
+                Graphics2D g2 =
+                        (Graphics2D) g;
 
-        JLabel frasco = new JLabel("⚗");
-        frasco.setFont(new Font("Arial", Font.PLAIN, 60));
-        frasco.setForeground(Color.BLACK);
-        frasco.setBounds(70, 205, 90, 80);
-        card.add(frasco);
+                GradientPaint gradiente =
+                        new GradientPaint(
+                                0,
+                                0,
+                                new Color(25,25,25),
 
-        JButton btnJogar = criarBotao("▶  Jogar", "Um jogador ou multi-jogador");
-        btnJogar.setBounds(220, 25, 230, 50);
+                                getWidth(),
+                                getHeight(),
+
+                                new Color(
+                                        120,
+                                        0,
+                                        25
+                                )
+                        );
+
+                g2.setPaint(gradiente);
+
+                g2.fillRect(
+                        0,
+                        0,
+                        getWidth(),
+                        getHeight()
+                );
+            }
+        };
+
+        add(fundo);
+
+        JLabel icone =
+                new JLabel(
+                        "🧪",
+                        SwingConstants.CENTER
+                );
+
+        icone.setFont(
+                new Font(
+                        "Segoe UI Emoji",
+                        Font.PLAIN,
+                        44
+                )
+        );
+
+        fundo.add(icone);
+
+        JLabel titulo =
+                new JLabel(
+                        "DOMINÓ QUÍMICO",
+                        SwingConstants.CENTER
+                );
+
+        titulo.setFont(
+                new Font(
+                        "Segoe UI",
+                        Font.BOLD,
+                        38
+                )
+        );
+
+        titulo.setForeground(
+                Color.WHITE
+        );
+
+        fundo.add(titulo);
+
+        JLabel subtitulo =
+                new JLabel(
+                        "Bem-vindo, " + nome,
+                        SwingConstants.CENTER
+                );
+
+        subtitulo.setFont(
+                new Font(
+                        "Segoe UI",
+                        Font.BOLD,
+                        16
+                )
+        );
+
+        subtitulo.setForeground(
+                new Color(
+                        230,
+                        230,
+                        230
+                )
+        );
+
+        fundo.add(subtitulo);
+
+        JPanel card =
+                new JPanel(null);
+
+        card.setBackground(
+                new Color(
+                        255,
+                        255,
+                        255,
+                        235
+                )
+        );
+
+        card.setBorder(
+                BorderFactory.createLineBorder(
+                        new Color(
+                                255,
+                                255,
+                                255,
+                                80
+                        ),
+                        2
+                )
+        );
+
+        fundo.add(card);
+
+        JLabel lblMenu =
+                new JLabel(
+                        "MENU PRINCIPAL",
+                        SwingConstants.CENTER
+                );
+
+        lblMenu.setBounds(
+                0,
+                20,
+                490,
+                30
+        );
+
+        lblMenu.setFont(
+                new Font(
+                        "Segoe UI",
+                        Font.BOLD,
+                        22
+                )
+        );
+
+        lblMenu.setForeground(
+                new Color(
+                        125,
+                        15,
+                        35
+                )
+        );
+
+        card.add(lblMenu);
+
+        JButton btnJogar =
+                criarBotao(
+                        "Jogar",
+                        "Multi-jogador"
+                );
+
+        btnJogar.setBounds(
+                125,
+                65,
+                240,
+                45
+        );
+
         card.add(btnJogar);
 
-        JButton btnTutorial = criarBotao("📘  Como Jogar", "");
-        btnTutorial.setBounds(220, 95, 230, 50);
+        JButton btnBot =
+                criarBotao(
+                        "🤖 Contra Bot",
+                        ""
+                );
+
+        btnBot.setBounds(
+                125,
+                120,
+                240,
+                45
+        );
+
+        card.add(btnBot);
+
+        JButton btnTutorial =
+                criarBotao(
+                        "📘 Como Jogar",
+                        ""
+                );
+
+        btnTutorial.setBounds(
+                125,
+                175,
+                240,
+                45
+        );
+
         card.add(btnTutorial);
 
-        JButton btnConfig = criarBotao("⚙  Configurações", "");
-        btnConfig.setBounds(220, 165, 230, 50);
+        JButton btnConfig =
+                criarBotao(
+                        "Configurações",
+                        ""
+                );
+
+        btnConfig.setBounds(
+                125,
+                230,
+                240,
+                45
+        );
+
         card.add(btnConfig);
 
-        JButton btnSair = criarBotao("↩  Sair", "");
-        btnSair.setBounds(220, 235, 230, 50);
+        JButton btnSair =
+                criarBotao(
+                        "Sair",
+                        ""
+                );
+
+        btnSair.setBounds(
+                125,
+                285,
+                240,
+                45
+        );
+
         card.add(btnSair);
 
         btnJogar.addActionListener(e -> {
+
             dispose();
-            new TelaSala(nome, Dificuldade.FACIL);
+
+            new TelaSala(
+                    nome,
+                    Dificuldade.FACIL
+            );
         });
 
-        btnTutorial.addActionListener(e -> new TelaTutorial());
+        btnBot.addActionListener(e -> {
 
-        btnConfig.addActionListener(e ->
-                JOptionPane.showMessageDialog(this, "⚙️ Em desenvolvimento")
+            dispose();
+
+            new TelaJogoBot(
+                    nome,
+                    Dificuldade.FACIL
+            );
+        });
+
+        btnTutorial.addActionListener(
+                e ->
+                        new TelaTutorial()
         );
 
-        btnSair.addActionListener(e -> System.exit(0));
+        btnConfig.addActionListener(
+                e ->
+                        JOptionPane.showMessageDialog(
+                                this,
+                                "⚙️ Em desenvolvimento"
+                        )
+        );
+
+        btnSair.addActionListener(
+                e ->
+                        System.exit(0)
+        );
+
+        getRootPane().registerKeyboardAction(
+                e -> System.exit(0),
+                KeyStroke.getKeyStroke("ESCAPE"),
+                JComponent.WHEN_IN_FOCUSED_WINDOW
+        );
 
         setVisible(true);
+
+        SwingUtilities.invokeLater(() -> {
+
+            int largura =
+                    getWidth();
+
+            int altura =
+                    getHeight();
+
+            fundo.setBounds(
+                    0,
+                    0,
+                    largura,
+                    altura
+            );
+
+            icone.setBounds(
+                    0,
+                    altura / 2 - 290,
+                    largura,
+                    60
+            );
+
+            titulo.setBounds(
+                    0,
+                    altura / 2 - 235,
+                    largura,
+                    50
+            );
+
+            subtitulo.setBounds(
+                    0,
+                    altura / 2 - 185,
+                    largura,
+                    30
+            );
+
+            card.setBounds(
+                    (largura - 490) / 2,
+                    (altura - 330) / 2 + 55,
+                    490,
+                    330
+            );
+
+            fundo.repaint();
+        });
     }
 
-    private JButton criarBotao(String titulo, String subtitulo) {
+    private JButton criarBotao(
+            String titulo,
+            String subtitulo
+    ) {
 
         String html =
                 "<html><center>" +
-                        "<span style='font-size:18px;'>" + titulo + "</span>" +
-                        (subtitulo.isEmpty()
-                                ? ""
-                                : "<br><span style='font-size:9px;'>" + subtitulo + "</span>") +
+                        titulo +
+
+                        (
+                                subtitulo.isEmpty()
+                                        ? ""
+                                        : "<br><span style='font-size:9px'>"
+                                        + subtitulo +
+                                        "</span>"
+                        )
+
+                        +
+
                         "</center></html>";
 
-        JButton b = new JButton(html);
+        JButton b =
+                new JButton(
+                        html
+                );
 
-        b.setBackground(Color.WHITE);
-        b.setForeground(new Color(125, 15, 35));
-        b.setFont(new Font("Arial", Font.BOLD, 16));
+        Color vermelho =
+                new Color(
+                        255,
+                        50,
+                        70
+                );
+
+        Color hover =
+                new Color(
+                        255,
+                        75,
+                        95
+                );
+
+        b.setBackground(vermelho);
+
+        b.setForeground(
+                Color.WHITE
+        );
+
+        b.setFont(
+                new Font(
+                        "Segoe UI",
+                        Font.BOLD,
+                        15
+                )
+        );
+
         b.setFocusPainted(false);
-        b.setBorder(BorderFactory.createLineBorder(new Color(125, 15, 35), 2));
-        b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        b.setCursor(
+                Cursor.getPredefinedCursor(
+                        Cursor.HAND_CURSOR
+                )
+        );
+
+        b.addMouseListener(
+                new java.awt.event.MouseAdapter() {
+
+                    public void mouseEntered(
+                            java.awt.event.MouseEvent e
+                    ) {
+
+                        b.setBackground(
+                                hover
+                        );
+                    }
+
+                    public void mouseExited(
+                            java.awt.event.MouseEvent e
+                    ) {
+
+                        b.setBackground(
+                                vermelho
+                        );
+                    }
+                }
+        );
 
         return b;
     }

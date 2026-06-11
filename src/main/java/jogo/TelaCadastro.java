@@ -15,51 +15,109 @@ public class TelaCadastro {
     public void Show() {
 
         JFrame frame = new JFrame("Cadastro");
-        frame.setSize(760, 430);
+
+        frame.setUndecorated(true);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setLayout(null);
-        frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().setBackground(new Color(160, 170, 180));
+
+        JPanel fundo = new JPanel(null) {
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+
+                Graphics2D g2 = (Graphics2D) g;
+
+                GradientPaint gradiente = new GradientPaint(
+                        0, 0,
+                        new Color(25, 25, 25),
+                        getWidth(), getHeight(),
+                        new Color(120, 0, 25)
+                );
+
+                g2.setPaint(gradiente);
+                g2.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+
+        frame.add(fundo);
+        fundo.setBounds(0, 0, 1920, 1080);
+
+        JLabel icone = new JLabel("🧪", SwingConstants.CENTER);
+        icone.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 44));
+        fundo.add(icone);
+
+        JLabel titulo = new JLabel("DOMINÓ QUÍMICO", SwingConstants.CENTER);
+        titulo.setFont(new Font("Segoe UI", Font.BOLD, 38));
+        titulo.setForeground(Color.WHITE);
+        fundo.add(titulo);
+
+        JLabel subtitulo = new JLabel("Crie sua conta para começar", SwingConstants.CENTER);
+        subtitulo.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        subtitulo.setForeground(new Color(230, 230, 230));
+        fundo.add(subtitulo);
 
         JPanel painel = new JPanel(null);
-        painel.setBounds(70, 50, 620, 300);
-        painel.setBackground(new Color(245, 245, 245));
-        frame.add(painel);
+        painel.setBackground(new Color(255, 255, 255, 235));
+        painel.setBorder(BorderFactory.createLineBorder(new Color(255, 255, 255, 80), 2));
+        fundo.add(painel);
 
-        JPanel faixaVermelha = new JPanel();
-        faixaVermelha.setBounds(0, 0, 620, 55);
-        faixaVermelha.setBackground(new Color(170, 0, 0));
-        painel.add(faixaVermelha);
+        JLabel lblCadastro = new JLabel("CADASTRO", SwingConstants.CENTER);
+        lblCadastro.setBounds(0, 15, 490, 30);
+        lblCadastro.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        lblCadastro.setForeground(new Color(125, 15, 35));
+        painel.add(lblCadastro);
 
         JTextField campoNome = criarCampo("Nome");
-        campoNome.setBounds(30, 70, 300, 45);
+        campoNome.setBounds(35, 60, 270, 38);
         painel.add(campoNome);
 
         JTextField campoUser = criarCampo("Usuário");
-        campoUser.setBounds(30, 125, 300, 45);
+        campoUser.setBounds(35, 105, 270, 38);
         painel.add(campoUser);
 
         JPasswordField campoSenha = criarCampoSenha();
-        campoSenha.setBounds(30, 180, 300, 45);
+        campoSenha.setBounds(35, 150, 270, 38);
         painel.add(campoSenha);
 
         JComboBox<String> comboTipo = new JComboBox<>(new String[]{"ALUNO", "PROFESSOR"});
-        comboTipo.setBounds(30, 235, 300, 40);
-        comboTipo.setFont(new Font("Arial", Font.BOLD, 16));
+        comboTipo.setBounds(35, 195, 270, 38);
+        comboTipo.setFont(new Font("Segoe UI", Font.BOLD, 14));
         comboTipo.setBackground(Color.WHITE);
+        comboTipo.setForeground(new Color(40, 40, 40));
         painel.add(comboTipo);
 
-        JButton botaoCadastrar = criarBotao("Adicionar Cadastro");
-        botaoCadastrar.setBounds(410, 85, 160, 40);
+        JButton botaoCadastrar = criarBotao("Cadastrar");
+        botaoCadastrar.setBounds(325, 70, 125, 38);
         painel.add(botaoCadastrar);
 
-        JButton botaoLogin = criarBotao("Já tem Cadastro?");
-        botaoLogin.setBounds(410, 155, 160, 40);
+        JButton botaoLogin = criarBotao("Login");
+        botaoLogin.setBounds(325, 125, 125, 38);
         painel.add(botaoLogin);
 
         JButton botaoSair = criarBotao("Sair");
-        botaoSair.setBounds(410, 225, 160, 40);
+        botaoSair.setBounds(325, 180, 125, 38);
         painel.add(botaoSair);
+
+        fundo.addComponentListener(new ComponentAdapter() {
+            public void componentResized(ComponentEvent e) {
+
+                int largura = fundo.getWidth();
+                int altura = fundo.getHeight();
+
+                fundo.setBounds(0, 0, largura, altura);
+
+                icone.setBounds(0, altura / 2 - 260, largura, 55);
+                titulo.setBounds(0, altura / 2 - 205, largura, 50);
+                subtitulo.setBounds(0, altura / 2 - 155, largura, 28);
+
+                painel.setBounds(
+                        (largura - 490) / 2,
+                        (altura - 285) / 2 + 45,
+                        490,
+                        285
+                );
+            }
+        });
 
         botaoCadastrar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -103,15 +161,64 @@ public class TelaCadastro {
 
         botaoSair.addActionListener(e -> System.exit(0));
 
+        frame.getRootPane().registerKeyboardAction(
+                e -> {
+                    frame.dispose();
+                    new TelaLogin(m_parent).Show();
+                },
+                KeyStroke.getKeyStroke("ESCAPE"),
+                JComponent.WHEN_IN_FOCUSED_WINDOW
+        );
+
+        Dimension tela =
+        Toolkit.getDefaultToolkit().getScreenSize();
+
+        fundo.setBounds(
+        0,
+        0,
+        tela.width,
+        tela.height
+        );
+        
         frame.setVisible(true);
+
+        
+
+        SwingUtilities.invokeLater(() -> {
+
+        int largura = frame.getWidth();
+        int altura = frame.getHeight();
+
+     fundo.setBounds(0, 0, largura, altura);
+
+        icone.setBounds(0, altura / 2 - 260, largura, 55);
+        titulo.setBounds(0, altura / 2 - 205, largura, 50);
+        subtitulo.setBounds(0, altura / 2 - 155, largura, 28);
+
+        painel.setBounds(
+            (largura - 490) / 2,
+            (altura - 285) / 2 + 45,
+            490,
+            285
+    );
+
+    fundo.revalidate();
+    fundo.repaint();
+});
     }
 
     private JTextField criarCampo(String texto) {
 
         JTextField campo = new JTextField(texto);
-        campo.setFont(new Font("Arial", Font.PLAIN, 18));
+        campo.setFont(new Font("Segoe UI", Font.BOLD, 14));
         campo.setForeground(Color.GRAY);
-        campo.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 2));
+        campo.setBackground(Color.WHITE);
+        campo.setBorder(
+                BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(220, 220, 220), 2),
+                        BorderFactory.createEmptyBorder(5, 12, 5, 12)
+                )
+        );
 
         campo.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent e) {
@@ -135,10 +242,16 @@ public class TelaCadastro {
     private JPasswordField criarCampoSenha() {
 
         JPasswordField campo = new JPasswordField("Senha");
-        campo.setFont(new Font("Arial", Font.PLAIN, 18));
+        campo.setFont(new Font("Segoe UI", Font.BOLD, 14));
         campo.setForeground(Color.GRAY);
+        campo.setBackground(Color.WHITE);
         campo.setEchoChar((char) 0);
-        campo.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 2));
+        campo.setBorder(
+                BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(220, 220, 220), 2),
+                        BorderFactory.createEmptyBorder(5, 12, 5, 12)
+                )
+        );
 
         campo.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent e) {
@@ -162,10 +275,30 @@ public class TelaCadastro {
     }
 
     private JButton criarBotao(String texto) {
+
         JButton botao = new JButton(texto);
-        botao.setFont(new Font("Arial", Font.BOLD, 14));
-        botao.setBackground(new Color(180, 195, 240));
+
+        Color vermelho = new Color(255, 50, 70);
+        Color hover = new Color(255, 75, 95);
+
+        botao.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        botao.setBackground(vermelho);
+        botao.setForeground(Color.WHITE);
         botao.setFocusPainted(false);
+        botao.setOpaque(true);
+        botao.setBorder(BorderFactory.createLineBorder(new Color(255, 120, 135), 2));
+        botao.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        botao.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                botao.setBackground(hover);
+            }
+
+            public void mouseExited(MouseEvent e) {
+                botao.setBackground(vermelho);
+            }
+        });
+
         return botao;
     }
 }

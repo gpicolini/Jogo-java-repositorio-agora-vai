@@ -14,6 +14,10 @@ public class TelaJogoOnline extends JFrame {
     private PainelMesaOnline painelMesa;
     private PartidaOnlineDAO dao;
 
+    private EstadoPartidaOnline estado;
+
+    private boolean atualizando = false;
+
     private JLabel lblInfo;
     private JLabel lblVez;
 
@@ -27,15 +31,58 @@ public class TelaJogoOnline extends JFrame {
         this.minhaOrdem = minhaOrdem;
         this.dao = new PartidaOnlineDAO();
 
+        this.estado =
+        new EstadoPartidaOnline(
+                codigoSala,
+                minhaOrdem,
+                dao.getQuantidadeJogadores(codigoSala)
+        );
+
+        
+
         setTitle("");
         setUndecorated(true);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        painelMesa = new PainelMesaOnline(dao, codigoSala, minhaOrdem, nomeJogador);
-        painelMao = new PainelMaoOnline(dao, codigoSala, minhaOrdem);
-        painelMao.setOpaque(false);
+        painelMesa = new PainelMesaOnline(
+        dao,
+        codigoSala,
+        minhaOrdem,
+        nomeJogador
+);
+
+painelMao = new PainelMaoOnline(
+        dao,
+        codigoSala,
+        minhaOrdem
+);
+
+// NOVO
+estado.carregarMesa(
+        dao.buscarMesa(
+                codigoSala
+        )
+);
+
+estado.carregarMao(
+        dao.buscarPecasJogador(
+                codigoSala,
+                minhaOrdem
+        )
+);
+
+painelMao.setOpaque(false);
+
+        painelMao.setBackground(
+        new Color(
+                0,
+                0,
+                0,
+                0
+        )
+);
 
         JLayeredPane camada = new JLayeredPane();
 
@@ -86,24 +133,92 @@ public class TelaJogoOnline extends JFrame {
         btnEsquerda.addActionListener(e -> jogar(false));
         btnDireita.addActionListener(e -> jogar(true));
 
-        btnComprar.addActionListener(e ->
-                JOptionPane.showMessageDialog(this, "Comprar ainda será ligado ao banco.")
+        btnComprar.addActionListener(e -> {
+
+    if (!dao.ehMinhaVez(codigoSala, minhaOrdem)) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Ainda não é sua vez!"
         );
 
-        btnSair.addActionListener(e -> {
-            if (timer != null) timer.stop();
-            dispose();
+        return;
+    }
+
+    lblVez.setText("🃏 Comprando...");
+
+    new Thread(() -> {
+
+        Peca p =
+                dao.comprarDoMonte(
+                        codigoSala
+                );
+
+        SwingUtilities.invokeLater(() -> {
+
+            if (p == null) {
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Monte vazio!"
+                );
+
+                return;
+            }
+
+                dao.adicionarPecaJogador(
+                codigoSala,
+            minhaOrdem,
+                        p
+);
+
+        painelMao.atualizarMao();
+
+        painelMao.revalidate();
+
+        painelMao.repaint();
+
+        lblVez.setText(
+        "✅ Peça comprada"
+);
+
         });
 
+    }).start();
+
+});
+
+        btnSair.addActionListener(e -> {
+
+    if (timer != null) {
+        timer.stop();
+    }
+
+            
+
+    dispose();
+    });
+
         getRootPane().registerKeyboardAction(
-                e -> dispose(),
-                KeyStroke.getKeyStroke("ESCAPE"),
-                JComponent.WHEN_IN_FOCUSED_WINDOW
-        );
+
+        e -> {
+
+            
+
+            dispose();
+
+        },
+
+        KeyStroke.getKeyStroke("ESCAPE"),
+
+        JComponent.WHEN_IN_FOCUSED_WINDOW
+);
 
         atualizarTela();
+        
+        painelMao.atualizarMao();
 
-        timer = new Timer(2500, e -> atualizarTela());
+        timer = new Timer(700, e -> atualizarTela());
         timer.start();
 
         setVisible(true);
@@ -115,65 +230,166 @@ public class TelaJogoOnline extends JFrame {
 
     private void jogar(boolean direita) {
 
-        int idPeca = painelMao.getIdPecaSelecionada();
+    int idPeca =
+            painelMao.getIdPecaSelecionada();
 
-        if (idPeca == -1) {
-            JOptionPane.showMessageDialog(this, "Selecione uma peça!");
-            return;
-        }
+    Peca pecaSelecionada =
+            painelMao.getPecaSelecionada();
 
-        new Thread(() -> {
+    if (
+            idPeca == -1
+            ||
+            pecaSelecionada == null
+    ) {
 
-            boolean minhaVez = dao.ehMinhaVez(codigoSala, minhaOrdem);
+        JOptionPane.showMessageDialog(
+                this,
+                "Selecione uma peça!"
+        );
 
-            if (!minhaVez) {
-                SwingUtilities.invokeLater(() ->
-                        JOptionPane.showMessageDialog(this, "Ainda não é sua vez!")
+        return;
+    }
+
+    if (
+            !dao.ehMinhaVez(
+                    codigoSala,
+                    minhaOrdem
+            )
+    ) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Ainda não é sua vez!"
+        );
+
+
+    
+
+   
+
+        return;
+    }
+
+    // UI INSTANTÂNEA
+    painelMao.limparSelecao();
+
+    painelMao.removerPecaSelecionadaLocal();
+
+    
+
+    painelMesa.adicionarPecaLocal(
+            pecaSelecionada
+    );
+
+    painelMesa.repaint();
+
+    lblVez.setText(
+            "⏳ Salvando..."
+    );
+
+    lblVez.setForeground(
+            Color.ORANGE
+    );
+
+    // BANCO EM PARALELO
+    new Thread(() -> {
+
+        boolean sucesso =
+                dao.jogarPecaNaMesa(
+                        codigoSala,
+                        idPeca,
+                        direita
                 );
-                return;
+
+        SwingUtilities.invokeLater(() -> {
+
+            if (sucesso) {
+
+                lblVez.setText(
+                        "⏳ Próximo jogador"
+                );
+
+                lblVez.setForeground(
+                        Color.YELLOW
+                );
+
+            } else {
+
+                painelMao.atualizarMao();
+
+                atualizarTela();
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Erro ao jogar!"
+                );
             }
 
-            boolean sucesso = dao.jogarPecaNaMesa(codigoSala, idPeca, direita);
+        });
 
-            SwingUtilities.invokeLater(() -> {
+    }).start();
+}
 
-                if (sucesso) {
-                    painelMao.limparSelecao();
-                    painelMao.atualizarMao();
-                    painelMesa.revalidate();
-                    painelMesa.repaint();
-                    atualizarTela();
-                } else {
-                    JOptionPane.showMessageDialog(this, "Essa peça não encaixa!");
-                }
-            });
 
-        }).start();
-    }
 
     private void atualizarTela() {
 
+    if (atualizando) return;
+
+    atualizando = true;
+
+    new Thread(() -> {
+
         int jogadorAtual = dao.getIndiceJogadorAtual(codigoSala);
         int qtdJogadores = dao.getQuantidadeJogadores(codigoSala);
+        java.util.ArrayList<Peca> pecasMesa = dao.buscarMesa(codigoSala);
 
-        lblInfo.setText(
-                "Sala: " + codigoSala +
-                        " | Você: Jogador " + (minhaOrdem + 1) +
-                        " | Nome: " + nomeJogador +
-                        " | Jogadores: " + qtdJogadores
-        );
+        boolean minhaVez = jogadorAtual == minhaOrdem;
 
-        if (jogadorAtual == minhaOrdem) {
-            lblVez.setText("É sua vez!");
-            lblVez.setForeground(new Color(0, 220, 0));
-            painelMao.atualizarMao();
-        } else {
-            lblVez.setText("⏳ Aguardando Jogador " + (jogadorAtual + 1));
-            lblVez.setForeground(Color.YELLOW);
-        }
+        SwingUtilities.invokeLater(() -> {
 
-        painelMesa.repaint();
-    }
+            lblInfo.setText(
+                    "Sala: " + codigoSala +
+                            " | Você: Jogador " + (minhaOrdem + 1) +
+                            " | Nome: " + nomeJogador +
+                            " | Jogadores: " + qtdJogadores
+            );
+
+            if (minhaVez) {
+
+                        lblVez.setText(
+                            "✅ É sua vez!"
+                                            );
+
+                lblVez.setForeground(
+                    new Color(
+                            0,
+                            220,
+                            0
+                                )
+                                            );
+
+                                    }
+                 else {
+                lblVez.setText("⏳ Aguardando Jogador " + (jogadorAtual + 1));
+                lblVez.setForeground(Color.YELLOW);
+            }
+
+            if (!pecasMesa.isEmpty()) {
+
+            painelMesa.atualizarCache(
+            qtdJogadores,
+            jogadorAtual,
+            pecasMesa
+    );
+
+}
+
+            atualizando = false;
+        });
+
+    }).start();
+}
 
     private JButton criarBotao(String texto) {
 
@@ -225,11 +441,11 @@ public class TelaJogoOnline extends JFrame {
         );
 
         painelMao.setBounds(
-                0,
-                altura - 215,
-                largura,
-                130
-        );
+        0,
+        altura - 260,
+        largura,
+        220
+);
 
         painelSul.setBounds(
         0,

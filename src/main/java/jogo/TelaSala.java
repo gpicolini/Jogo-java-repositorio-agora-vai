@@ -27,56 +27,91 @@ public class TelaSala extends JFrame {
         this.dificuldade = dificuldade;
         this.dao = new PartidaOnlineDAO();
 
-        Color vinho = new Color(125, 15, 35);
-
-        setTitle("Sala Online - Dominó Químico");
-        setSize(700, 430);
-        setLocationRelativeTo(null);
+        setUndecorated(true);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(null);
-        getContentPane().setBackground(Color.WHITE);
+
+        JPanel fundo = new JPanel(null) {
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+
+                Graphics2D g2 = (Graphics2D) g;
+
+                GradientPaint gradiente = new GradientPaint(
+                        0, 0,
+                        new Color(25, 25, 25),
+                        getWidth(), getHeight(),
+                        new Color(120, 0, 25)
+                );
+
+                g2.setPaint(gradiente);
+                g2.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+
+        add(fundo);
+
+        JLabel icone = new JLabel("🌐", SwingConstants.CENTER);
+        icone.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 44));
+        fundo.add(icone);
 
         JLabel titulo = new JLabel("SALA ONLINE", SwingConstants.CENTER);
-        titulo.setBounds(0, 25, 700, 45);
-        titulo.setFont(new Font("Segoe UI", Font.BOLD, 34));
-        titulo.setForeground(vinho);
-        add(titulo);
+        titulo.setFont(new Font("Segoe UI", Font.BOLD, 38));
+        titulo.setForeground(Color.WHITE);
+        fundo.add(titulo);
+
+        JLabel subtitulo = new JLabel("Crie uma sala ou entre pelo código", SwingConstants.CENTER);
+        subtitulo.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        subtitulo.setForeground(new Color(230, 230, 230));
+        fundo.add(subtitulo);
 
         JPanel card = new JPanel(null);
-        card.setBounds(120, 85, 460, 260);
-        card.setBackground(Color.WHITE);
-        add(card);
+        card.setBackground(new Color(255, 255, 255, 235));
+        card.setBorder(
+                BorderFactory.createLineBorder(
+                        new Color(255, 255, 255, 80),
+                        2
+                )
+        );
+        fundo.add(card);
 
         lblCodigo = new JLabel("Código da sala: ---", SwingConstants.CENTER);
-        lblCodigo.setBounds(30, 10, 400, 35);
-        lblCodigo.setFont(new Font("Arial", Font.BOLD, 18));
-        lblCodigo.setForeground(vinho);
+        lblCodigo.setBounds(25, 18, 380, 32);
+        lblCodigo.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblCodigo.setForeground(new Color(125, 15, 35));
         card.add(lblCodigo);
 
         lblStatus = new JLabel("Crie ou entre em uma sala", SwingConstants.CENTER);
-        lblStatus.setBounds(30, 48, 400, 30);
-        lblStatus.setFont(new Font("Arial", Font.BOLD, 14));
-        lblStatus.setForeground(Color.DARK_GRAY);
+        lblStatus.setBounds(25, 52, 380, 28);
+        lblStatus.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblStatus.setForeground(new Color(50, 50, 50));
         card.add(lblStatus);
 
         txtCodigo = new JTextField();
-        txtCodigo.setBounds(80, 88, 300, 38);
+        txtCodigo.setBounds(65, 92, 300, 38);
         txtCodigo.setHorizontalAlignment(SwingConstants.CENTER);
-        txtCodigo.setFont(new Font("Arial", Font.BOLD, 18));
-        txtCodigo.setForeground(vinho);
-        txtCodigo.setBorder(BorderFactory.createLineBorder(vinho, 2));
+        txtCodigo.setFont(new Font("Segoe UI", Font.BOLD, 17));
+        txtCodigo.setForeground(new Color(125, 15, 35));
+        txtCodigo.setBackground(Color.WHITE);
+        txtCodigo.setBorder(
+                BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(220, 220, 220), 2),
+                        BorderFactory.createEmptyBorder(5, 10, 5, 10)
+                )
+        );
         card.add(txtCodigo);
 
         JButton btnCriar = criarBotao("Criar sala");
-        btnCriar.setBounds(115, 138, 230, 35);
+        btnCriar.setBounds(100, 145, 230, 36);
         card.add(btnCriar);
 
         JButton btnEntrar = criarBotao("Entrar na sala");
-        btnEntrar.setBounds(115, 183, 230, 35);
+        btnEntrar.setBounds(100, 190, 230, 36);
         card.add(btnEntrar);
 
         JButton btnIniciar = criarBotao("Iniciar jogo");
-        btnIniciar.setBounds(115, 228, 230, 35);
+        btnIniciar.setBounds(100, 235, 230, 36);
         btnIniciar.setEnabled(false);
         card.add(btnIniciar);
 
@@ -144,118 +179,82 @@ public class TelaSala extends JFrame {
             }
         });
 
+        getRootPane().registerKeyboardAction(
+                e -> {
+                    if (timer != null) timer.stop();
+                    dispose();
+                    new TelaMenu(nomeJogador);
+                },
+                KeyStroke.getKeyStroke("ESCAPE"),
+                JComponent.WHEN_IN_FOCUSED_WINDOW
+        );
+
         setVisible(true);
+
+        SwingUtilities.invokeLater(() -> {
+
+            int largura = getWidth();
+            int altura = getHeight();
+
+            fundo.setBounds(0, 0, largura, altura);
+
+            icone.setBounds(0, altura / 2 - 255, largura, 55);
+            titulo.setBounds(0, altura / 2 - 200, largura, 50);
+            subtitulo.setBounds(0, altura / 2 - 150, largura, 28);
+
+            card.setBounds(
+                    (largura - 430) / 2,
+                    (altura - 275) / 2 + 45,
+                    430,
+                    275
+            );
+
+            fundo.revalidate();
+            fundo.repaint();
+        });
     }
 
     private JButton criarBotao(String texto) {
 
-    JButton botao = new JButton(texto);
+        JButton botao = new JButton(texto);
 
-    botao.setPreferredSize(
-            new Dimension(
-                    145,
-                    52
-            )
-    );
+        Color vermelho = new Color(255, 50, 70);
+        Color hover = new Color(255, 75, 95);
 
-    botao.setBackground(
-            new Color(
-                    220,
-                    0,
-                    35
-            )
-    );
+        botao.setBackground(vermelho);
+        botao.setForeground(Color.WHITE);
+        botao.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        botao.setFocusPainted(false);
+        botao.setOpaque(true);
+        botao.setBorder(
+                BorderFactory.createLineBorder(
+                        new Color(255, 120, 135),
+                        2
+                )
+        );
+        botao.setCursor(
+                Cursor.getPredefinedCursor(
+                        Cursor.HAND_CURSOR
+                )
+        );
 
-    botao.setForeground(
-            Color.WHITE
-    );
+        botao.addMouseListener(new java.awt.event.MouseAdapter() {
 
-    botao.setFont(
-            new Font(
-                    "Segoe UI",
-                    Font.BOLD,
-                    16
-            )
-    );
-
-    botao.setFocusPainted(false);
-
-    botao.setBorder(
-            BorderFactory.createCompoundBorder(
-
-                    BorderFactory.createLineBorder(
-                            new Color(
-                                    255,
-                                    50,
-                                    70
-                            ),
-                            3
-                    ),
-
-                    BorderFactory.createEmptyBorder(
-                            8,
-                            20,
-                            8,
-                            20
-                    )
-            )
-    );
-
-    botao.setCursor(
-            Cursor.getPredefinedCursor(
-                    Cursor.HAND_CURSOR
-            )
-    );
-
-    botao.setOpaque(true);
-
-    botao.addMouseListener(
-            new java.awt.event.MouseAdapter() {
-
-                public void mouseEntered(
-                        java.awt.event.MouseEvent e
-                ) {
-
-                    botao.setBackground(
-                            new Color(
-                                    255,
-                                    30,
-                                    60
-                            )
-                    );
-
-                    botao.setBounds(
-                            botao.getX(),
-                            botao.getY() - 2,
-                            botao.getWidth(),
-                            botao.getHeight()
-                    );
-                }
-
-                public void mouseExited(
-                        java.awt.event.MouseEvent e
-                ) {
-
-                    botao.setBackground(
-                            new Color(
-                                    220,
-                                    0,
-                                    35
-                            )
-                    );
-
-                    botao.setBounds(
-                            botao.getX(),
-                            botao.getY() + 2,
-                            botao.getWidth(),
-                            botao.getHeight()
-                    );
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (botao.isEnabled()) {
+                    botao.setBackground(hover);
                 }
             }
-    );
 
-    return botao;
-}
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (botao.isEnabled()) {
+                    botao.setBackground(vermelho);
+                }
+            }
+        });
+
+        return botao;
+    }
 
     private void iniciarTimer() {
 
@@ -263,7 +262,7 @@ public class TelaSala extends JFrame {
             timer.stop();
         }
 
-        timer = new Timer(1000, e -> {
+        timer = new Timer(500, e -> {
 
             String status = dao.getStatusSala(codigoSala);
             int qtd = dao.getQuantidadeJogadores(codigoSala);
@@ -281,23 +280,21 @@ public class TelaSala extends JFrame {
 
     private void abrirJogoOnline() {
 
-    if (jogoAberto) return;
+        if (jogoAberto) return;
 
-    jogoAberto = true;
+        jogoAberto = true;
 
-    if (timer != null) {
-        timer.stop();
+        if (timer != null) {
+            timer.stop();
+        }
+
+        dispose();
+
+        new TelaJogoOnline(
+                nomeJogador,
+                dificuldade,
+                codigoSala,
+                minhaOrdem
+        );
     }
-
-    dispose();
-
-    new TelaJogoOnline(
-            nomeJogador,
-            dificuldade,
-            codigoSala,
-            minhaOrdem
-    );
 }
-}
-
-

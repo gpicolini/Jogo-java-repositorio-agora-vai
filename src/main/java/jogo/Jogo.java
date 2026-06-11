@@ -9,7 +9,8 @@ public class Jogo {
     private static final String URL =
             "jdbc:mysql://trolley.proxy.rlwy.net:52251/railway?useSSL=false&serverTimezone=UTC";
 
-    private static final String USER = "root";
+    private static final String USER =
+            "root";
 
     private static final String PASSWORD =
             "TUEbJashZWrUFTRZyBeIYBXtUZEUILVG";
@@ -27,18 +28,37 @@ public class Jogo {
             System.out.println("Driver MySQL não encontrado!");
         }
 
-        conn = DriverManager.getConnection(URL, USER, PASSWORD);
+        conn = DriverManager.getConnection(
+                URL,
+                USER,
+                PASSWORD
+        );
 
         System.out.println("Conexão estabelecida com sucesso!");
 
+        abrirLoading();
+    }
+
+    public void abrirLoading() {
+        new TelaLoading(this);
+    }
+
+    public void abrirCadastro() {
+
         Cadastro = new TelaCadastro(this);
         Cadastro.Show();
+    }
+
+    public void abrirLogin() {
+
+        Login = new TelaLogin(this);
+        Login.Show();
     }
 
     public void abrirJogo(String nome) {
 
         System.out.println("Jogador logado: " + nome);
 
-        new TelaSala(nome, Dificuldade.FACIL);
+        new TelaMenu(nome);
     }
 }

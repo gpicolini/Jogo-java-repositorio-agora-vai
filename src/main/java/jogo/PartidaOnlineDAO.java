@@ -3,6 +3,25 @@ package jogo;
 import java.sql.*;
 
 public class PartidaOnlineDAO {
+    
+    
+    
+    private Connection conn;
+
+    private Connection getConn() throws Exception {
+
+    if (
+        conn == null
+        ||
+        conn.isClosed()
+    ) {
+
+        conn =
+                BancoDados.conectar();
+    }
+
+    return conn;
+}
 
     public String criarSala(Dificuldade dificuldade) {
 
@@ -35,7 +54,7 @@ public class PartidaOnlineDAO {
             stmt.executeUpdate();
 
             stmt.close();
-            conn.close();
+            // conn.close();
 
             return codigo;
 
@@ -53,7 +72,7 @@ public class PartidaOnlineDAO {
             int salaId = buscarIdSala(conn, codigo);
 
             if (salaId == -1) {
-                conn.close();
+                // conn.close();
                 return -1;
             }
 
@@ -75,7 +94,7 @@ public class PartidaOnlineDAO {
             countStmt.close();
 
             if (ordem >= 4) {
-                conn.close();
+                // conn.close();
                 return -2;
             }
 
@@ -100,7 +119,7 @@ public class PartidaOnlineDAO {
             insert.executeUpdate();
 
             insert.close();
-            conn.close();
+            // conn.close();
 
             return ordem;
 
@@ -131,14 +150,14 @@ public class PartidaOnlineDAO {
 
                 rs.close();
                 stmt.close();
-                conn.close();
+                // conn.close();
 
                 return indice;
             }
 
             rs.close();
             stmt.close();
-            conn.close();
+            // conn.close();
 
             return -1;
 
@@ -156,7 +175,7 @@ public class PartidaOnlineDAO {
             int salaId = buscarIdSala(conn, codigo);
 
             if (salaId == -1) {
-                conn.close();
+                // conn.close();
                 return 0;
             }
 
@@ -176,7 +195,7 @@ public class PartidaOnlineDAO {
 
             rs.close();
             stmt.close();
-            conn.close();
+            // conn.close();
 
             return quantidade;
 
@@ -199,7 +218,7 @@ public class PartidaOnlineDAO {
             int quantidade = getQuantidadeJogadores(codigo);
 
             if (atual == -1 || quantidade <= 0) {
-                conn.close();
+                // conn.close();
                 return false;
             }
 
@@ -223,7 +242,7 @@ public class PartidaOnlineDAO {
             stmt.executeUpdate();
 
             stmt.close();
-            conn.close();
+            // conn.close();
 
             return true;
 
@@ -250,7 +269,7 @@ public class PartidaOnlineDAO {
             stmt.executeUpdate();
 
             stmt.close();
-            conn.close();
+            // conn.close();
 
             return true;
 
@@ -281,14 +300,14 @@ public class PartidaOnlineDAO {
 
                 rs.close();
                 stmt.close();
-                conn.close();
+                // conn.close();
 
                 return status;
             }
 
             rs.close();
             stmt.close();
-            conn.close();
+            // conn.close();
 
             return null;
 
@@ -297,6 +316,51 @@ public class PartidaOnlineDAO {
             return null;
         }
     }
+
+    public java.util.ArrayList<Peca> buscarPecasJogador(
+        String codigo,
+        int ordem
+) {
+    java.util.ArrayList<Peca> pecas = new java.util.ArrayList<>();
+
+    try {
+        Connection conn = getConn();
+
+        int salaId = buscarIdSala(conn, codigo);
+
+        String sql = """
+                SELECT lado_esquerdo, lado_direito
+                FROM pecas_jogador
+                WHERE sala_id=?
+                AND ordem_jogador=?
+                AND usada=FALSE
+                """;
+
+        PreparedStatement stmt = conn.prepareStatement(sql);
+
+        stmt.setInt(1, salaId);
+        stmt.setInt(2, ordem);
+
+        ResultSet rs = stmt.executeQuery();
+
+        while (rs.next()) {
+            pecas.add(
+                    new Peca(
+                            rs.getString("lado_esquerdo"),
+                            rs.getString("lado_direito")
+                    )
+            );
+        }
+
+        rs.close();
+        stmt.close();
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return pecas;
+}
 
     private int buscarIdSala(Connection conn, String codigo) throws SQLException {
 
@@ -329,13 +393,13 @@ public boolean distribuirPecasSala(String codigo) {
     try {
 
         Connection conn =
-                BancoDados.conectar();
+        getConn();
 
         int salaId =
                 buscarIdSala(conn, codigo);
 
         if (salaId == -1) {
-            conn.close();
+            // conn.close();
             return false;
         }
 
@@ -345,7 +409,7 @@ public boolean distribuirPecasSala(String codigo) {
         int qtd =
                 getQuantidadeJogadores(codigo);
 
-        String sql = """
+        String sqlJogador = """
             INSERT INTO pecas_jogador
             (
                 sala_id,
@@ -357,8 +421,8 @@ public boolean distribuirPecasSala(String codigo) {
             (?, ?, ?, ?)
         """;
 
-        PreparedStatement stmt =
-                conn.prepareStatement(sql);
+        PreparedStatement stmtJogador =
+                conn.prepareStatement(sqlJogador);
 
         for (int jogador = 0; jogador < qtd; jogador++) {
 
@@ -367,42 +431,60 @@ public boolean distribuirPecasSala(String codigo) {
                 Peca p =
                         monte.comprarPeca();
 
-                if (p == null)
+                if (p == null) {
                     break;
+                }
 
-                stmt.setInt(
-                        1,
-                        salaId
-                );
+                stmtJogador.setInt(1, salaId);
+                stmtJogador.setInt(2, jogador);
+                stmtJogador.setString(3, p.getLadoEsquerdo());
+                stmtJogador.setString(4, p.getLadoDireito());
 
-                stmt.setInt(
-                        2,
-                        jogador
-                );
-
-                stmt.setString(
-                        3,
-                        p.getLadoEsquerdo()
-                );
-
-                stmt.setString(
-                        4,
-                        p.getLadoDireito()
-                );
-
-                stmt.executeUpdate();
+                stmtJogador.executeUpdate();
             }
         }
 
-        stmt.close();
-        conn.close();
+        stmtJogador.close();
+
+        String sqlMonte = """
+            INSERT INTO monte_online
+            (
+                codigo_sala,
+                lado_esquerdo,
+                lado_direito,
+                comprada
+            )
+            VALUES
+            (?, ?, ?, false)
+        """;
+
+        PreparedStatement stmtMonte =
+                conn.prepareStatement(sqlMonte);
+
+        while (true) {
+
+            Peca p =
+                    monte.comprarPeca();
+
+            if (p == null) {
+                break;
+            }
+
+            stmtMonte.setString(1, codigo);
+            stmtMonte.setString(2, p.getLadoEsquerdo());
+            stmtMonte.setString(3, p.getLadoDireito());
+
+            stmtMonte.executeUpdate();
+        }
+
+        stmtMonte.close();
+        // conn.close();
 
         return true;
 
     } catch (Exception e) {
 
         e.printStackTrace();
-
         return false;
     }
 }
@@ -415,7 +497,7 @@ public ResultSet buscarMinhaMao(
     try {
 
         Connection conn =
-                BancoDados.conectar();
+        getConn();
 
         int salaId =
                 buscarIdSala(
@@ -462,8 +544,9 @@ public boolean jogarPecaOnline(
 
     try {
 
+
         Connection conn =
-                BancoDados.conectar();
+        getConn();
 
         String sql =
                 """
@@ -483,7 +566,7 @@ public boolean jogarPecaOnline(
         stmt.executeUpdate();
 
         stmt.close();
-        conn.close();
+        // conn.close();
 
         return true;
 
@@ -502,8 +585,9 @@ public java.util.ArrayList<Peca> buscarMesa(String codigo) {
 
     try {
 
+
         Connection conn =
-                BancoDados.conectar();
+        getConn();
 
         int salaId =
                 buscarIdSala(
@@ -550,7 +634,7 @@ public java.util.ArrayList<Peca> buscarMesa(String codigo) {
 
         rs.close();
         stmt.close();
-        conn.close();
+        // conn.close();
 
     } catch (Exception e) {
 
@@ -567,12 +651,12 @@ public boolean jogarPecaNaMesa(
         boolean direita
 ) {
     try {
-        Connection conn = BancoDados.conectar();
-
+        Connection conn = getConn();
+        
         int salaId = buscarIdSala(conn, codigo);
 
         if (salaId == -1) {
-            conn.close();
+            // conn.close();
             return false;
         }
 
@@ -592,7 +676,7 @@ public boolean jogarPecaNaMesa(
         if (!rs.next()) {
             rs.close();
             stmtBuscar.close();
-            conn.close();
+            // conn.close();
             return false;
         }
 
@@ -655,7 +739,7 @@ public boolean jogarPecaNaMesa(
             if (!rsPonta.next()) {
                 rsPonta.close();
                 stmtPonta.close();
-                conn.close();
+                // conn.close();();
                 return false;
             }
 
@@ -685,7 +769,7 @@ public boolean jogarPecaNaMesa(
                 }
 
                 else {
-                    conn.close();
+                    // conn.close();
                     return false;
                 }
 
@@ -707,7 +791,7 @@ public boolean jogarPecaNaMesa(
 
                
                 else {
-                    conn.close();
+                    // conn.close();
                     return false;
                 }
             }
@@ -745,7 +829,7 @@ public boolean jogarPecaNaMesa(
         stmtUsada.executeUpdate();
         stmtUsada.close();
 
-        conn.close();
+        // conn.close();
 
         passarTurno(codigo);
 
@@ -756,6 +840,143 @@ public boolean jogarPecaNaMesa(
         return false;
     }
 }
+
+
+public Peca comprarDoMonte(String codigo) {
+
+    try {
+
+        Connection conn =
+        getConn();
+
+        String buscar = """
+                SELECT id, lado_esquerdo, lado_direito
+                FROM monte_online
+                WHERE codigo_sala=?
+                AND comprada=false
+                ORDER BY id
+                LIMIT 1
+                """;
+
+        PreparedStatement stmtBuscar =
+                conn.prepareStatement(buscar);
+
+        stmtBuscar.setString(1, codigo);
+
+        ResultSet rs =
+                stmtBuscar.executeQuery();
+
+        if (!rs.next()) {
+            rs.close();
+            stmtBuscar.close();
+            // conn.close();
+            return null;
+        }
+
+        int idMonte =
+                rs.getInt("id");
+
+        String ladoEsquerdo =
+                rs.getString("lado_esquerdo");
+
+        String ladoDireito =
+                rs.getString("lado_direito");
+
+        rs.close();
+        stmtBuscar.close();
+
+        String atualizar = """
+                UPDATE monte_online
+                SET comprada=true
+                WHERE id=?
+                """;
+
+        PreparedStatement stmtAtualizar =
+                conn.prepareStatement(atualizar);
+
+        stmtAtualizar.setInt(1, idMonte);
+        stmtAtualizar.executeUpdate();
+
+        stmtAtualizar.close();
+        // conn.close();
+
+        return new Peca(
+                ladoEsquerdo,
+                ladoDireito
+        );
+
+    } catch (Exception e) {
+
+        e.printStackTrace();
+        return null;
+    }
+}
+
+
+public boolean adicionarPecaJogador(
+        String codigo,
+        int ordem,
+        Peca p
+) {
+
+    try {
+
+        Connection conn =
+        getConn();
+
+        int salaId =
+                buscarIdSala(
+                        conn,
+                        codigo
+                );
+
+        String sql = """
+                INSERT INTO pecas_jogador
+                (
+                    sala_id,
+                    ordem_jogador,
+                    lado_esquerdo,
+                    lado_direito
+                )
+                VALUES
+                (?, ?, ?, ?)
+                """;
+
+        PreparedStatement stmt =
+                conn.prepareStatement(sql);
+
+        stmt.setInt(1, salaId);
+
+        stmt.setInt(
+                2,
+                ordem
+        );
+
+        stmt.setString(
+                3,
+                p.getLadoEsquerdo()
+        );
+
+        stmt.setString(
+                4,
+                p.getLadoDireito()
+        );
+
+        stmt.executeUpdate();
+
+        stmt.close();
+    // conn.close();
+
+        return true;
+
+    } catch (Exception e) {
+
+        e.printStackTrace();
+
+        return false;
+    }
+}
+
 
 
 }

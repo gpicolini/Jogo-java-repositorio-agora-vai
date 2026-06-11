@@ -15,38 +15,67 @@ public class TelaLogin {
     public void Show() {
 
         JFrame frame = new JFrame("Login");
-        frame.setSize(760, 430);
+
+        frame.setUndecorated(true);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(null);
-        frame.setLocationRelativeTo(null);
-        frame.getContentPane().setBackground(new Color(160, 170, 180));
+
+        JPanel fundo = new JPanel(null) {
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+
+                Graphics2D g2 = (Graphics2D) g;
+
+                GradientPaint gradiente = new GradientPaint(
+                        0, 0,
+                        new Color(25, 25, 25),
+                        getWidth(), getHeight(),
+                        new Color(120, 0, 25)
+                );
+
+                g2.setPaint(gradiente);
+                g2.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+
+        frame.add(fundo);
+
+        JLabel icone = new JLabel("🧪", SwingConstants.CENTER);
+        icone.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 44));
+        fundo.add(icone);
+
+        JLabel titulo = new JLabel("DOMINÓ QUÍMICO", SwingConstants.CENTER);
+        titulo.setFont(new Font("Segoe UI", Font.BOLD, 38));
+        titulo.setForeground(Color.WHITE);
+        fundo.add(titulo);
+
+        JLabel subtitulo = new JLabel("Acesse sua conta para continuar", SwingConstants.CENTER);
+        subtitulo.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        subtitulo.setForeground(new Color(230, 230, 230));
+        fundo.add(subtitulo);
 
         JPanel painel = new JPanel(null);
-        painel.setBounds(130, 65, 500, 260);
-        painel.setBackground(new Color(245, 245, 245));
-        frame.add(painel);
+        painel.setBackground(new Color(255, 255, 255, 235));
+        painel.setBorder(BorderFactory.createLineBorder(new Color(255, 255, 255, 80), 2));
+        fundo.add(painel);
 
-        JPanel faixaVermelha = new JPanel();
-        faixaVermelha.setBounds(0, 0, 500, 55);
-        faixaVermelha.setBackground(new Color(170, 0, 0));
-        painel.add(faixaVermelha);
-
-        JLabel titulo = new JLabel("LOGIN", SwingConstants.CENTER);
-        titulo.setBounds(0, 12, 500, 30);
-        titulo.setFont(new Font("Arial", Font.BOLD, 22));
-        titulo.setForeground(Color.WHITE);
-        faixaVermelha.add(titulo);
+        JLabel lblLogin = new JLabel("LOGIN", SwingConstants.CENTER);
+        lblLogin.setBounds(0, 15, 400, 30);
+        lblLogin.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        lblLogin.setForeground(new Color(125, 15, 35));
+        painel.add(lblLogin);
 
         JTextField campoUser = criarCampo("Usuário");
-        campoUser.setBounds(70, 85, 360, 50);
+        campoUser.setBounds(45, 60, 310, 42);
         painel.add(campoUser);
 
         JPasswordField campoSenha = criarCampoSenha();
-        campoSenha.setBounds(70, 150, 360, 50);
+        campoSenha.setBounds(45, 112, 310, 42);
         painel.add(campoSenha);
 
         JButton botaoLogin = criarBotao("Entrar");
-        botaoLogin.setBounds(185, 215, 130, 35);
+        botaoLogin.setBounds(125, 165, 150, 38);
         painel.add(botaoLogin);
 
         botaoLogin.addActionListener(new ActionListener() {
@@ -93,14 +122,53 @@ public class TelaLogin {
             }
         });
 
+        frame.getRootPane().registerKeyboardAction(
+                e -> {
+                    frame.dispose();
+                    new TelaCadastro(m_parent).Show();
+                },
+                KeyStroke.getKeyStroke("ESCAPE"),
+                JComponent.WHEN_IN_FOCUSED_WINDOW
+        );
+
         frame.setVisible(true);
+
+        SwingUtilities.invokeLater(() -> {
+
+            int largura = frame.getWidth();
+            int altura = frame.getHeight();
+
+            fundo.setBounds(0, 0, largura, altura);
+
+            icone.setBounds(0, altura / 2 - 235, largura, 55);
+            titulo.setBounds(0, altura / 2 - 180, largura, 50);
+            subtitulo.setBounds(0, altura / 2 - 130, largura, 28);
+
+            painel.setBounds(
+                    (largura - 400) / 2,
+                    (altura - 210) / 2 + 55,
+                    400,
+                    210
+            );
+
+            fundo.revalidate();
+            fundo.repaint();
+        });
     }
 
     private JTextField criarCampo(String texto) {
+
         JTextField campo = new JTextField(texto);
-        campo.setFont(new Font("Arial", Font.PLAIN, 18));
+
+        campo.setFont(new Font("Segoe UI", Font.BOLD, 15));
         campo.setForeground(Color.GRAY);
-        campo.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 2));
+        campo.setBackground(Color.WHITE);
+        campo.setBorder(
+                BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(220, 220, 220), 2),
+                        BorderFactory.createEmptyBorder(5, 12, 5, 12)
+                )
+        );
 
         campo.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent e) {
@@ -122,11 +190,19 @@ public class TelaLogin {
     }
 
     private JPasswordField criarCampoSenha() {
+
         JPasswordField campo = new JPasswordField("Senha");
-        campo.setFont(new Font("Arial", Font.PLAIN, 18));
+
+        campo.setFont(new Font("Segoe UI", Font.BOLD, 15));
         campo.setForeground(Color.GRAY);
+        campo.setBackground(Color.WHITE);
         campo.setEchoChar((char) 0);
-        campo.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 2));
+        campo.setBorder(
+                BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(220, 220, 220), 2),
+                        BorderFactory.createEmptyBorder(5, 12, 5, 12)
+                )
+        );
 
         campo.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent e) {
@@ -150,10 +226,30 @@ public class TelaLogin {
     }
 
     private JButton criarBotao(String texto) {
+
         JButton botao = new JButton(texto);
-        botao.setFont(new Font("Arial", Font.BOLD, 14));
-        botao.setBackground(new Color(180, 195, 240));
+
+        Color vermelho = new Color(255, 50, 70);
+        Color hover = new Color(255, 75, 95);
+
+        botao.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        botao.setBackground(vermelho);
+        botao.setForeground(Color.WHITE);
         botao.setFocusPainted(false);
+        botao.setOpaque(true);
+        botao.setBorder(BorderFactory.createLineBorder(new Color(255, 120, 135), 2));
+        botao.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        botao.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                botao.setBackground(hover);
+            }
+
+            public void mouseExited(MouseEvent e) {
+                botao.setBackground(vermelho);
+            }
+        });
+
         return botao;
     }
 }

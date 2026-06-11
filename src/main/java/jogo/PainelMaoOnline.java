@@ -180,4 +180,23 @@ protected void paintComponent(Graphics g) {
 
         g2.drawString(texto, textoX, textoY);
     }
+
+    public void removerPecaSelecionadaLocal() {
+
+    if (indiceSelecionado >= 0 && indiceSelecionado < pecas.size()) {
+        pecas.remove(indiceSelecionado);
+        ids.remove(indiceSelecionado);
+        indiceSelecionado = -1;
+        repaint();
+    }
+}
+
+        public Peca getPecaSelecionada() {
+
+    if (indiceSelecionado < 0 || indiceSelecionado >= pecas.size()) {
+        return null;
+    }
+
+    return pecas.get(indiceSelecionado);
+    }
 }

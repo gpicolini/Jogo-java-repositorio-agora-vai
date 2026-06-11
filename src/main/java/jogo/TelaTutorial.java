@@ -7,11 +7,10 @@ public class TelaTutorial extends JFrame {
 
     public TelaTutorial() {
 
-        setTitle("Como Jogar - Dominó Químico");
-        setSize(1000, 650);
-        setLocationRelativeTo(null);
+        setUndecorated(true);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setLayout(new BorderLayout());
+        setLayout(null);
 
         JPanel fundo = new JPanel(null) {
             protected void paintComponent(Graphics g) {
@@ -22,15 +21,31 @@ public class TelaTutorial extends JFrame {
 
                 if (url != null) {
                     ImageIcon img = new ImageIcon(url);
-                    g.drawImage(img.getImage(), 0, 0, getWidth(), getHeight(), this);
+                    g.drawImage(
+                            img.getImage(),
+                            0,
+                            0,
+                            getWidth(),
+                            getHeight(),
+                            this
+                    );
                 } else {
-                    g.setColor(new Color(240, 240, 240));
-                    g.fillRect(0, 0, getWidth(), getHeight());
+                    Graphics2D g2 = (Graphics2D) g;
+
+                    GradientPaint gradiente = new GradientPaint(
+                            0, 0,
+                            new Color(25, 25, 25),
+                            getWidth(), getHeight(),
+                            new Color(120, 0, 25)
+                    );
+
+                    g2.setPaint(gradiente);
+                    g2.fillRect(0, 0, getWidth(), getHeight());
                 }
             }
         };
 
-        add(fundo, BorderLayout.CENTER);
+        add(fundo);
 
         JPanel card = new JPanel(null) {
             protected void paintComponent(Graphics g) {
@@ -50,21 +65,14 @@ public class TelaTutorial extends JFrame {
             }
         };
 
-        card.setBounds(80, 55, 840, 520);
         card.setOpaque(false);
         fundo.add(card);
 
-        JButton btnVoltar = new JButton("← VOLTAR");
-        btnVoltar.setBounds(25, 20, 110, 32);
-        btnVoltar.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        btnVoltar.setForeground(new Color(125, 15, 35));
-        btnVoltar.setBackground(Color.WHITE);
-        btnVoltar.setFocusPainted(false);
+        JButton btnVoltar = criarBotaoVoltar("← VOLTAR");
         card.add(btnVoltar);
 
         JLabel titulo = new JLabel("COMO JOGAR", SwingConstants.CENTER);
-        titulo.setBounds(0, 25, 840, 45);
-        titulo.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        titulo.setFont(new Font("Segoe UI", Font.BOLD, 30));
         titulo.setForeground(Color.BLACK);
         card.add(titulo);
 
@@ -85,7 +93,6 @@ public class TelaTutorial extends JFrame {
                 Se não tiver peça compatível, compre do Monte.
                 """);
 
-        esquerda.setBounds(50, 95, 330, 350);
         card.add(esquerda);
 
         JTextArea direita = criarTexto("""
@@ -97,11 +104,9 @@ public class TelaTutorial extends JFrame {
                 entre NOME e FÓRMULA.
                 """);
 
-        direita.setBounds(455, 95, 340, 145);
         card.add(direita);
 
         JLabel lblCorreto = new JLabel("A. ENCAIXE CORRETO:");
-        lblCorreto.setBounds(455, 245, 300, 25);
         lblCorreto.setForeground(new Color(20, 150, 60));
         lblCorreto.setFont(new Font("Segoe UI", Font.BOLD, 16));
         card.add(lblCorreto);
@@ -112,24 +117,20 @@ public class TelaTutorial extends JFrame {
                 NaCl combina com Sal.
                 CaO combina com Óxido.
                 """);
-        textoCorreto.setBounds(455, 272, 330, 85);
         card.add(textoCorreto);
 
         JPanel exemploCorreto = new JPanel(null);
-        exemploCorreto.setBounds(455, 355, 340, 75);
         exemploCorreto.setOpaque(false);
         card.add(exemploCorreto);
 
         desenharPecaExemplo(exemploCorreto, 20, 10, "Ácido", "HCl");
 
         JLabel lblIncorreto = new JLabel("B. ENCAIXE INCORRETO:");
-        lblIncorreto.setBounds(455, 430, 300, 25);
         lblIncorreto.setForeground(new Color(200, 40, 40));
         lblIncorreto.setFont(new Font("Segoe UI", Font.BOLD, 16));
         card.add(lblIncorreto);
 
         JPanel exemploIncorreto = new JPanel(null);
-        exemploIncorreto.setBounds(455, 455, 340, 65);
         exemploIncorreto.setOpaque(false);
         card.add(exemploIncorreto);
 
@@ -137,7 +138,52 @@ public class TelaTutorial extends JFrame {
 
         btnVoltar.addActionListener(e -> dispose());
 
+        getRootPane().registerKeyboardAction(
+                e -> dispose(),
+                KeyStroke.getKeyStroke("ESCAPE"),
+                JComponent.WHEN_IN_FOCUSED_WINDOW
+        );
+
         setVisible(true);
+
+        SwingUtilities.invokeLater(() -> {
+
+            int largura = getWidth();
+            int altura = getHeight();
+
+            fundo.setBounds(0, 0, largura, altura);
+
+            int cardW = 900;
+            int cardH = 540;
+
+            card.setBounds(
+                    (largura - cardW) / 2,
+                    (altura - cardH) / 2,
+                    cardW,
+                    cardH
+            );
+
+            btnVoltar.setBounds(25, 22, 120, 34);
+
+            titulo.setBounds(0, 25, cardW, 45);
+
+            esquerda.setBounds(55, 95, 350, 360);
+
+            direita.setBounds(480, 95, 350, 145);
+
+            lblCorreto.setBounds(480, 245, 330, 25);
+
+            textoCorreto.setBounds(480, 272, 340, 85);
+
+            exemploCorreto.setBounds(480, 355, 360, 75);
+
+            lblIncorreto.setBounds(480, 430, 330, 25);
+
+            exemploIncorreto.setBounds(480, 455, 360, 65);
+
+            fundo.revalidate();
+            fundo.repaint();
+        });
     }
 
     private JTextArea criarTexto(String texto) {
@@ -153,7 +199,37 @@ public class TelaTutorial extends JFrame {
         return area;
     }
 
-    private void desenharPecaExemplo(JPanel painel, int x, int y, String lado1, String lado2) {
+    private JButton criarBotaoVoltar(String texto) {
+
+        JButton botao = new JButton(texto);
+
+        botao.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        botao.setForeground(new Color(125, 15, 35));
+        botao.setBackground(Color.WHITE);
+        botao.setFocusPainted(false);
+        botao.setOpaque(true);
+        botao.setBorder(
+                BorderFactory.createLineBorder(
+                        new Color(125, 15, 35),
+                        2
+                )
+        );
+        botao.setCursor(
+                Cursor.getPredefinedCursor(
+                        Cursor.HAND_CURSOR
+                )
+        );
+
+        return botao;
+    }
+
+    private void desenharPecaExemplo(
+            JPanel painel,
+            int x,
+            int y,
+            String lado1,
+            String lado2
+    ) {
 
         JPanel peca = new JPanel(null);
         peca.setBounds(x, y, 130, 55);
