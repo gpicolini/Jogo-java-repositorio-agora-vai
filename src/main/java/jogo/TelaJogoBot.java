@@ -65,8 +65,18 @@ public class TelaJogoBot extends JFrame {
         Monte m = new Monte(dificuldade);
 
         for (int i = 0; i < 7; i++) {
-            maoJogador.add(m.comprarPeca());
-            maoBot.add(m.comprarPeca());
+
+            Peca pJogador = m.comprarPeca();
+
+            if (pJogador != null) {
+                maoJogador.add(pJogador);
+            }
+
+            Peca pBot = m.comprarPeca();
+
+            if (pBot != null) {
+                maoBot.add(pBot);
+            }
         }
 
         Peca p;
@@ -87,11 +97,26 @@ public class TelaJogoBot extends JFrame {
 
         Peca p = maoJogador.get(index);
 
-        mesa.add(p);
-        maoJogador.remove(index);
+        Peca direita = ajustarPecaParaDireita(p);
+        Peca esquerda = ajustarPecaParaEsquerda(p);
+
+        if (direita != null) {
+
+            mesa.add(direita);
+            maoJogador.remove(index);
+
+        } else if (esquerda != null) {
+
+            mesa.add(0, esquerda);
+            maoJogador.remove(index);
+
+        } else {
+
+            JOptionPane.showMessageDialog(this, "Essa peça não encaixa!");
+            return;
+        }
 
         verificarFim();
-
         atualizarTela();
 
         Timer t = new Timer(1000, e -> jogarBot());
@@ -106,24 +131,106 @@ public class TelaJogoBot extends JFrame {
             return;
         }
 
-        maoJogador.add(monte.remove(0));
+        Peca p = monte.remove(0);
+
+        if (p != null) {
+            maoJogador.add(p);
+        }
 
         atualizarTela();
     }
 
     private void jogarBot() {
 
-        if (maoBot.isEmpty()) {
-            verificarFim();
-            return;
+        for (int i = 0; i < maoBot.size(); i++) {
+
+            Peca p = maoBot.get(i);
+
+            if (p == null) {
+                continue;
+            }
+
+            Peca direita = ajustarPecaParaDireita(p);
+
+            if (direita != null) {
+
+                mesa.add(direita);
+                maoBot.remove(i);
+
+                verificarFim();
+                atualizarTela();
+                return;
+            }
+
+            Peca esquerda = ajustarPecaParaEsquerda(p);
+
+            if (esquerda != null) {
+
+                mesa.add(0, esquerda);
+                maoBot.remove(i);
+
+                verificarFim();
+                atualizarTela();
+                return;
+            }
         }
 
-        Peca p = maoBot.remove(0);
-        mesa.add(p);
+        if (!monte.isEmpty()) {
 
-        verificarFim();
+            Peca comprada = monte.remove(0);
+
+            if (comprada != null) {
+                maoBot.add(comprada);
+            }
+        }
 
         atualizarTela();
+    }
+
+    private Peca ajustarPecaParaDireita(Peca p) {
+
+        if (p == null) return null;
+
+        if (mesa.isEmpty()) return p;
+
+        Peca ultima = mesa.get(mesa.size() - 1);
+
+        if (ultima == null) return null;
+
+        String ponta = ultima.getLadoDireito();
+
+        if (ponta.equalsIgnoreCase(p.getLadoEsquerdo())) {
+            return p;
+        }
+
+        if (ponta.equalsIgnoreCase(p.getLadoDireito())) {
+            return new Peca(p.getLadoDireito(), p.getLadoEsquerdo());
+        }
+
+        return null;
+    }
+
+    private Peca ajustarPecaParaEsquerda(Peca p) {
+
+        if (p == null) return null;
+
+        if (mesa.isEmpty()) return p;
+
+        Peca primeira = mesa.get(0);
+
+        if (primeira == null) return null;
+
+        String ponta = primeira.getLadoEsquerdo();
+
+        if (ponta.equalsIgnoreCase(p.getLadoDireito())) {
+            return p;
+        }
+
+        if (ponta.equalsIgnoreCase(p.getLadoEsquerdo())) {
+            return new Peca(p.getLadoDireito(), p.getLadoEsquerdo());
+        }
+
+        return null;
     }
 
     private void verificarFim() {
@@ -131,6 +238,7 @@ public class TelaJogoBot extends JFrame {
         if (maoJogador.isEmpty()) {
             JOptionPane.showMessageDialog(this, nomeJogador + " venceu!");
             dispose();
+            return;
         }
 
         if (maoBot.isEmpty()) {
@@ -146,7 +254,16 @@ public class TelaJogoBot extends JFrame {
         areaJogo.append("Mesa:\n\n");
 
         for (Peca p : mesa) {
-            areaJogo.append("[ " + p.getLadoEsquerdo() + " | " + p.getLadoDireito() + " ] ");
+
+            if (p == null) continue;
+
+            areaJogo.append(
+                    "[ " +
+                            p.getLadoEsquerdo() +
+                            " | " +
+                            p.getLadoDireito() +
+                            " ] "
+            );
         }
 
         areaJogo.append("\n\nMonte: " + monte.size() + " peças");
@@ -155,8 +272,13 @@ public class TelaJogoBot extends JFrame {
         modeloMao.clear();
 
         for (Peca p : maoJogador) {
+
+            if (p == null) continue;
+
             modeloMao.addElement(
-                    p.getLadoEsquerdo() + " | " + p.getLadoDireito()
+                    p.getLadoEsquerdo() +
+                            " | " +
+                            p.getLadoDireito()
             );
         }
     }
