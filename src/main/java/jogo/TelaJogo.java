@@ -138,7 +138,7 @@ public class TelaJogo extends JFrame {
         int indice = painelMao.getIndiceSelecionado();
 
         if (indice == -1) {
-            JOptionPane.showMessageDialog(this, "Selecione uma peça!");
+            MensagemUI.mostrar(this, "Atenção", "Selecione uma peça!");
             return;
         }
 

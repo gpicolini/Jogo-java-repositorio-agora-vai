@@ -273,10 +273,11 @@ public class TelaMenu extends JFrame {
 
         btnConfig.addActionListener(
                 e ->
-                        JOptionPane.showMessageDialog(
-                                this,
-                                "⚙️ Em desenvolvimento"
-                        )
+                        MensagemUI.mostrar(
+        this,
+        "Mensagem",
+        "⚙️ Em desenvolvimento"
+)
         );
 
         btnSair.addActionListener(

@@ -107,8 +107,8 @@ public class PainelMesaOnline extends JPanel {
             );
         }
 
-        int larguraMesa = 900;
-        int alturaMesa = 500;
+        int larguraMesa = 1120;
+        int alturaMesa = 620;
 
         int xMesa =
                 (getWidth() - larguraMesa) / 2;
@@ -166,13 +166,13 @@ public class PainelMesaOnline extends JPanel {
                 alturaMesa
         );
 
-        desenharPecasDaMesa(g2);
+        
     }
 
     private void desenharMonte(Graphics2D g2, int xMesa, int yMesa) {
 
         int x = xMesa + 65;
-        int y = yMesa + 210;
+        int y = yMesa + 100;
 
         for (int i = 0; i < 4; i++) {
             g2.setColor(Color.WHITE);
@@ -281,86 +281,7 @@ repaint();
         );
     }
 
-private void desenharPecasDaMesa(Graphics2D g2) {
 
-    try {
-
-        int largura = 120;
-        int altura = 60;
-        int espaco = 15;
-
-        java.util.ArrayList<Peca> pecas =
-                pecasMesaCache;
-
-        int total =
-                pecas.size() * (largura + espaco);
-
-        int x =
-                (getWidth() - total) / 2;
-
-        int y =
-                getHeight() / 2;
-
-        for (Peca p : pecas) {
-
-            g2.setColor(Color.WHITE);
-
-            g2.fillRoundRect(
-                    x,
-                    y,
-                    largura,
-                    altura,
-                    15,
-                    15
-            );
-
-            g2.setColor(Color.BLACK);
-
-            g2.drawRoundRect(
-                    x,
-                    y,
-                    largura,
-                    altura,
-                    15,
-                    15
-            );
-
-            g2.drawLine(
-                    x + largura / 2,
-                    y,
-                    x + largura / 2,
-                    y + altura
-            );
-
-            // ← TROCOU SÓ ISSO
-            g2.setFont(fontePeca);
-
-            desenharTextoCentro(
-                    g2,
-                    p.getLadoEsquerdo(),
-                    x,
-                    y,
-                    largura / 2,
-                    altura
-            );
-
-            desenharTextoCentro(
-                    g2,
-                    p.getLadoDireito(),
-                    x + largura / 2,
-                    y,
-                    largura / 2,
-                    altura
-            );
-
-            x += largura + espaco;
-        }
-
-    } catch (Exception e) {
-
-        e.printStackTrace();
-    }
-}
 
 private void desenharTextoCentro(
         Graphics2D g2,
